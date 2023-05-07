@@ -1,0 +1,20 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  image: gcc:latest
+  script:
+    - apt-get update && apt-get install -y pkg-config libraylib-dev
+    - cc main.c `pkg-config --libs --cflags raylib` -o app
+  artifacts:
+    paths:
+      - app
+
+test:
+  stage: test
+  image: gcc:latest
+  script:
+    - cc test.c -o bin/test
+    - ./bin/test
