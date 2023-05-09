@@ -23,11 +23,12 @@ build:
     - make build
   artifacts:
     paths:
-      - app
+      - bin/app
 
 test:
   stage: test
   image: gcc:latest
   script:
+    - mkdir bin
     - cc test.c -o bin/test
     - ./bin/test
