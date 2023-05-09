@@ -55,3 +55,4 @@ dkms.conf
 # Out
 /bin/*
 .DS_Store
+.vscode/*

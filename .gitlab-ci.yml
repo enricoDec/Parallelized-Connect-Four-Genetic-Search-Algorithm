@@ -6,7 +6,20 @@ build:
   stage: build
   image: gcc:latest
   script:
-    - apt-get update && apt-get install -y pkg-config libraylib-dev
+    - apt-get update && apt-get install -y build-essential git cmake
+    - apt-get install -y libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev
+    - git clone https://github.com/raysan5/raylib.git raylib
+    - cd raylib
+    - mkdir build && cd build
+    - cmake -DBUILD_SHARED_LIBS=ON ..
+    - make
+    - sudo make install
+    - cd ../..
+    - git clone https://github.com/raysan5/raygui raygui
+    - cd raygui
+    - mv src/raygui.h src/raygui.c
+    - gcc -o raygui.so src/raygui.c -shared -fpic -DRAYGUI_IMPLEMENTATION -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+    - cd ..
     - cc main.c `pkg-config --libs --cflags raylib` -o app
   artifacts:
     paths:
