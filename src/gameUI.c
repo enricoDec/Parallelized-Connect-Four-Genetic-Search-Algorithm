@@ -5,9 +5,10 @@
 
 const bool isDebug = true;
 bool startGame = false;
-int boardSize = 0;      // 0: 7x6, 1: 8x8, 2: 9x7, 3: 9x9
+int boardSize = 0; // 0: 7x6, 1: 8x8, 2: 9x7, 3: 9x9
 
-void initUI(int screenWidth, int screenHeight) {
+void initUI(int screenWidth, int screenHeight)
+{
     InitWindow(screenWidth, screenHeight, "Connect Four");
     SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
     SetWindowState(FLAG_WINDOW_RESIZABLE);
