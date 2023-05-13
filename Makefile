@@ -2,23 +2,42 @@ CC := cc
 CFLAGS := $(shell pkg-config --cflags raylib)
 LDFLAGS := $(shell pkg-config --libs raylib) -lm
 
-SRCS := main.c
-OBJS := $(SRCS:.c=.o)
-BIN_DIR := ./bin
-TARGET := $(BIN_DIR)/app
+SRCDIR := src
+TESTDIR := test
+BUILDDIR := build
+BINDIR := bin
+TARGET := $(BINDIR)/app
+TESTTARGET := $(BINDIR)/test
 
-.PHONY: all clean build
+SOURCES := $(wildcard $(SRCDIR)/*.c)
+OBJECTS := $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(SOURCES))
 
-all: $(TARGET)
+TESTSOURCES := $(wildcard $(SRCDIR)/*.c $(TESTDIR)/*.c)
+TESTOBJECTS := $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(filter-out $(SRCDIR)/main.c, $(TESTSOURCES)))
 
-build: $(TARGET)
+.PHONY: all clean build test
 
-$(TARGET): $(OBJS)
-	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
+all: build
 
-%.o: %.c
+build: clean $(TARGET)
+
+test: clean $(TESTTARGET)
+
+$(TARGET): $(OBJECTS)
+	@mkdir -p $(BINDIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+$(TESTTARGET): $(TESTOBJECTS)
+	@mkdir -p $(BINDIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+	@mkdir -p $(BUILDDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/%.o: $(TESTDIR)/%.c
+	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	$(RM) -r $(BIN_DIR) $(OBJS)
+	rm -rf $(BUILDDIR) $(BINDIR)

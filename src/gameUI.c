@@ -1,25 +1,20 @@
+#include "includes/gameUI.h"
 #include "raylib.h"
-
 #define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
+#include "includes/raygui.h"
 
-#define MAX_DROPDOWN_ITEMS 3
+const bool isDebug = true;
+bool startGame = false;
+int boardSize = 0;      // 0: 7x6, 1: 8x8, 2: 9x7, 3: 9x9
 
-int main(void)
-{
-    const int screenWidth = 800;
-    const int screenHeight = 450;
-    bool isDebug = true;
-    bool startGame = false;
-
-    // Game options
-    int boardSize = 0;      // 0: 7x6, 1: 8x8, 2: 9x7, 3: 9x9
-    int startingPlayer = 0; // 0: Random, 1: User, 2: PC
-
+void initUI(int screenWidth, int screenHeight) {
     InitWindow(screenWidth, screenHeight, "Connect Four");
     SetTargetFPS(GetMonitorRefreshRate(GetCurrentMonitor()));
     SetWindowState(FLAG_WINDOW_RESIZABLE);
+}
 
+void loop(Game_context game)
+{
     // Const text
     const char *WelcomeLabel = "WELCOME TO CONNECT FOUR!";
     const char *StartButtonText = "START";
@@ -42,7 +37,6 @@ int main(void)
     {
         int screenWidth = GetScreenWidth();
         int screenHeight = GetScreenHeight();
-        Vector2 mainAnchor = {screenWidth / 2, screenHeight / 2};
         BeginDrawing();
         if (isDebug)
         {
@@ -85,5 +79,4 @@ int main(void)
         EndDrawing();
     }
     CloseWindow();
-    return 0;
 }
