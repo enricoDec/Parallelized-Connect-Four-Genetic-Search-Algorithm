@@ -27,7 +27,7 @@ build:
       - bin/app
 
 doxygen_job:
-  stage: document 
+  stage: build 
   image: gcc:latest
   script:
     - apt-get update && apt-get install -y doxygen
