@@ -30,8 +30,7 @@ doxygen_job:
   image: gcc:latest
   script:
     - apt-get update && apt-get install -y doxygen
-    - ls
-    - doxygen doxyfile
+    - doxygen Doxyfile
   artifacts:
     paths:
       - doc/
