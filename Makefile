@@ -12,8 +12,8 @@ TESTTARGET := $(BINDIR)/test
 SOURCES := $(wildcard $(SRCDIR)/*.c)
 OBJECTS := $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(SOURCES))
 
-TESTSOURCES := $(wildcard $(SRCDIR)/*.c $(TESTDIR)/*.c)
-TESTOBJECTS := $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(filter-out $(SRCDIR)/main.c, $(TESTSOURCES)))
+TESTSOURCES := $(wildcard $(TESTDIR)/*.c)
+TESTOBJECTS := $(patsubst $(TESTDIR)/%.c, $(BUILDDIR)/%.o, $(TESTSOURCES))
 
 .PHONY: all clean build test
 

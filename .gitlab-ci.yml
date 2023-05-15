@@ -20,19 +20,14 @@ build:
     - mv src/raygui.h src/raygui.c
     - gcc -o raygui.so src/raygui.c -shared -fpic -DRAYGUI_IMPLEMENTATION -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
     - cd ..
+    - apt install libomp-dev
     - make build
   artifacts:
     paths:
       - bin/app
 
-test:
-  stage: test
-  image: gcc:latest
-  script:
-    - make test
-    - ./bin/test
-
 doxygen_job:
+  stage: document 
   image: gcc:latest
   script:
     - apt-get update && apt-get install -y doxygen
@@ -40,3 +35,10 @@ doxygen_job:
   artifacts:
     paths:
       - doc/
+
+test:
+  stage: test
+  image: gcc:latest
+  script:
+    - make test
+    - ./bin/test
