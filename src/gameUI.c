@@ -216,6 +216,7 @@ int drawCoinFlip(Game_context *game)
 
     // Animated gif
     int animFrames = 0;
+    ChangeDirectory(GetApplicationDirectory()); // oh beatiful macOS, gotta love you
     Image gifImage = LoadImageAnim("../res/monkey_angry.gif", &animFrames);
     Texture2D gifTexture = LoadTextureFromImage(gifImage);
     unsigned int nextFrameDataOffset = 0;
