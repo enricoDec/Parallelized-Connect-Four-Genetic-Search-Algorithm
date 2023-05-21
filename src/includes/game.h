@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <stdbool.h>
+
 /**
  * @file game.h
  * @brief This file contains the game logic
@@ -27,7 +29,7 @@ typedef enum
 } boardState;
 
 /**
- * @brief The game state
+ * @brief The game state, used to determine the current player. 
  */
 typedef enum
 {
@@ -57,6 +59,7 @@ typedef struct
     boardState **board;            /**< The board */
     startingPlayer startingPlayer; /**< The starting player */
     gameState gameState;           /**< The game state */
+    boardState winner;             /**< The winner of the game */
 } Game_context;
 
 /**
@@ -89,5 +92,25 @@ int getStartPlayer(int startingPlayer);
  * @param game The game context
  */
 void endGame(Game_context *game);
+
+/**
+ * @brief Check if the move is valid, returns false if the board is full
+ * @param game The game context
+ * @return true if the move is valid, false if the board is full
+ */
+bool checkMove(Game_context *game);
+
+/**
+ * @brief Check if the game is finished
+ * @param game The game context
+ * @return 0 if the game is not finished, 1 if the player wins, 2 if the PC wins, 3 if it's a draw
+ */
+int checkWin(Game_context *game);
+
+/**
+ * @brief Reset the game
+ * @param game The game context
+ */
+void resetGame(Game_context *game);
 
 #endif // GAME_H

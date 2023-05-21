@@ -22,6 +22,56 @@ void initUI(int screenWidth, int screenHeight);
 void loop(Game_context *game);
 
 /**
+ * @brief Draw the welcome window
+ * @param game The game context
+ * @param prevVisualStyleActive The previous active visual style
+ */
+void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive);
+
+/**
+ * @brief Draw the game window
+ * @param game The game context
+ */
+void drawGameWindow(Game_context *game);
+
+/**
+ * @brief Draw the finish window
+ * @param game The game context
+ */
+void drawFinishWindow(Game_context *game);
+
+/**
+ * @brief Do the player move
+ * @param game The game context
+ * @param cursorX The cursor X position (player column selection)
+ */
+void doPlayerMove(Game_context *game, int cursorX);
+
+/**
+ * @brief Do the PC move
+ * @param game The game context
+ */
+void doPCMove(Game_context *game);
+
+/**
+ * @brief Draw the board
+ * @param game The game context
+ * @param cursorX The cursor X position (player column selection), -1 if not visible
+ */
+void drawBoard(Game_context *game, int cursorX);
+
+/**
+ * @brief Draw the coin flip to decide the starting player
+ * @param game The game context
+ * @return -1 if exit window, else 0
+ */
+int drawCoinFlip(Game_context *game);
+
+//////////////////////////////////////////
+//              Utils                   //
+//////////////////////////////////////////
+
+/**
  * @brief Update the style of the UI
  * @param visualStyleActive The active visual style, where:
  * - 0 = default,
@@ -36,29 +86,27 @@ void loop(Game_context *game);
 void updateStyle(int visualStyleActive, int *prevVisualStyleActive);
 
 /**
- * @brief Draw the welcome window
- * @param game The game context
- * @param prevVisualStyleActive The previous active visual style
+ * @brief Update the font of the UI based on the current window size
+ * @param screenWidth The width of the screen
  */
-void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive);
+void updateFont(int screenWidth);
 
 /**
- * @brief Draw the game window
- * @param game The game context
+ * @brief Get the font size for a heading 1
+ * @return The heading 1 font size
  */
-void drawGameWindow(Game_context *game);
+int getH1Font(void);
 
 /**
- * @brief Draw the board
- * @param game The game context
+ * @brief Get the font size for a heading 2
+ * @return The heading 2 font size
  */
-void drawBoard(Game_context *game);
+int getH2Font(void);
 
 /**
- * @brief Draw the coin flip to decide the starting player
- * @param game The game context
- * @return -1 if exit window, else 0
+ * @brief Get the font size for body text
+ * @return The body text font size
  */
-int drawCoinFlip(Game_context *game);
+int getBodyFont(void);
 
 #endif // GAME_UI_H
