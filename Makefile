@@ -19,9 +19,9 @@ TESTOBJECTS := $(patsubst $(TESTDIR)/%.c, $(BUILDDIR)/%.o, $(TESTSOURCES))
 
 all: build
 
-build: clean $(TARGET)
+build: $(TARGET)
 
-test: clean $(TESTTARGET)
+test: $(TESTTARGET)
 
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(BINDIR)
