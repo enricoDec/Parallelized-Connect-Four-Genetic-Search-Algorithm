@@ -16,17 +16,17 @@ typedef enum
     WELCOME, /**< The welcome window */
     GAME,    /**< The game window */
     FINISH   /**< The finish window */
-} currentWindow;
+} CurrentWindow;
 
 /**
- * @brief The boardState of the board
+ * @brief The BoardState of the board
  */
 typedef enum
 {
     EMPTY = 0,  /**< The board cell is empty */
     PLAYER = 1, /**< The board cell is occupied by the player */
     PC = 2,     /**< The board cell is occupied by the PC */
-} boardState;
+} BoardState;
 
 /**
  * @brief The game state, used to determine the current player. 
@@ -36,7 +36,7 @@ typedef enum
     PRE_GAME = 0,    /**< The game is not started yet */
     PLAYER_TURN = 1, /**< The player's turn */
     PC_TURN = 2,     /**< The PC's turn */
-} gameState;
+} GameState;
 
 /**
  * @brief The starting player
@@ -46,24 +46,24 @@ typedef enum
     RANDOM = 0,   /**< Randomly choose the starting player */
     USER = 1,     /**< User starts the game */
     COMPUTER = 2, /**< Computer starts the game */
-} startingPlayer;
+} StartingPlayer;
 
 /**
  * @brief The game context
  */
 typedef struct
 {
-    currentWindow gameWindow;      /**< The current window of the game */
+    CurrentWindow gameWindow;      /**< The current window of the game */
     int boardRows;                 /**< Number of rows in the board */
     int boardCols;                 /**< Number of columns in the board */
-    boardState **board;            /**< The board */
-    startingPlayer startingPlayer; /**< The starting player */
-    gameState gameState;           /**< The game state */
-    boardState winner;             /**< The winner of the game */
+    BoardState **board;            /**< The board */
+    StartingPlayer startingPlayer; /**< The starting player */
+    GameState gameState;           /**< The game state */
+    BoardState winner;             /**< The winner of the game */
 } Game_context;
 
 /**
- * @brief Initialize the game context, be sure to call endGame(Game_context *game) to free the memory
+ * @brief Initialize the game context, be sure to call cleanupGame(Game_context *game) to free the memory
  * @param boardRows Number of rows in the board
  * @param boardCols Number of columns in the board
  * @param startingPlayer 0: Random, 1: User, 2: PC
@@ -91,26 +91,50 @@ int getStartPlayer(int startingPlayer);
  * @brief End the game and free the memory
  * @param game The game context
  */
-void endGame(Game_context *game);
+void cleanupGame(Game_context *game);
 
 /**
- * @brief Check if the move is valid, returns false if the board is full
+ * @brief Do the move and update the game state, return false if the move is invalid
  * @param game The game context
- * @return true if the move is valid, false if the board is full
+ * @param col The column to place the piece
+ * @param player The player to place the piece
+ * @return true if the move is valid, false otherwise
  */
-bool checkMove(Game_context *game);
+bool doMove(Game_context *game, int col, BoardState player);
+
+/**
+ * @brief Undo the move for the given column and player
+ * @param game The game context
+ * @param col The column to undo the move
+ * @param player The player to undo the move
+ */
+void undoMove(Game_context *game, int col, BoardState player);
+
+/**
+ * @brief Check if the board is full
+ * @param game The game context
+ * @return true if the board is full, false otherwise
+ */
+bool isBoardFull(Game_context game);
 
 /**
  * @brief Check if the game is finished
  * @param game The game context
  * @return 0 if the game is not finished, 1 if the player wins, 2 if the PC wins, 3 if it's a draw
  */
-int checkWin(Game_context *game);
+int checkWin(Game_context game);
 
 /**
  * @brief Reset the game
  * @param game The game context
  */
 void resetGame(Game_context *game);
+
+/**
+ * @brief Copy the game context
+ * @param source The source game context
+ * @return The copied game context
+ */
+Game_context copyGameContext(const Game_context* source);
 
 #endif // GAME_H

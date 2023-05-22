@@ -41,19 +41,6 @@ void drawGameWindow(Game_context *game);
 void drawFinishWindow(Game_context *game);
 
 /**
- * @brief Do the player move
- * @param game The game context
- * @param cursorX The cursor X position (player column selection)
- */
-void doPlayerMove(Game_context *game, int cursorX);
-
-/**
- * @brief Do the PC move
- * @param game The game context
- */
-void doPCMove(Game_context *game);
-
-/**
  * @brief Draw the board
  * @param game The game context
  * @param cursorX The cursor X position (player column selection), -1 if not visible

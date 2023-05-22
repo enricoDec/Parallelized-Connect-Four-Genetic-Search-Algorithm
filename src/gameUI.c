@@ -6,8 +6,7 @@
 #pragma GCC diagnostic ignored "-Wextra"
 #include "includes/raygui.h" // TODO: fix include
 #pragma GCC diagnostic pop
-
-#undef RAYGUI_IMPLEMENTATION
+#include "includes/geneticSearch.h"
 
 // Global variables
 const bool isDebug = true;
@@ -188,11 +187,11 @@ void drawGameWindow(Game_context *game)
         ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
         if (game->gameState == PLAYER_TURN && (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_DOWN)))
         {
-            doPlayerMove(game, cursorX);
+            doMove(game, cursorX, PLAYER);
         }
         if (game->gameState == PC_TURN)
         {
-            doPCMove(game);
+            doMove(game, geneticSearch(copyGameContext(game)), PC);
         }
         DrawText(game->gameState == PLAYER_TURN ? PLAYER_TURN_LABEL : PC_TURN_LABEL, screenWidth * 0.02f, screenHeight * 0.08f, getH1Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
         drawBoard(game, cursorX);
@@ -249,55 +248,6 @@ void drawFinishWindow(Game_context *game)
     CloseWindow();
 }
 
-void doPlayerMove(Game_context *game, int cursorX)
-{
-    if (checkMove(game))
-    {
-        for (int row = game->boardRows - 1; row >= 0; row--)
-        {
-            if (game->board[row][cursorX] == EMPTY)
-            {
-                game->board[row][cursorX] = PLAYER;
-                break;
-            }
-        }
-        int win = checkWin(game);
-        if (win != 0)
-        {
-            game->gameWindow = FINISH;
-            game->winner = win == 1 ? PLAYER : win == 2 ? PC
-                                                        : EMPTY;
-            return;
-        }
-        game->gameState = PC_TURN;
-    }
-}
-
-void doPCMove(Game_context *game)
-{
-    if (checkMove(game))
-    {
-        int pcMove = rand() % game->boardCols;
-        for (int row = game->boardRows - 1; row >= 0; row--)
-        {
-            if (game->board[row][pcMove] == EMPTY)
-            {
-                game->board[row][pcMove] = PC;
-                break;
-            }
-        }
-        int win = checkWin(game);
-        if (win != 0)
-        {
-            game->gameWindow = FINISH;
-            game->winner = win == 1 ? PLAYER : win == 2 ? PC
-                                                        : EMPTY;
-            return;
-        }
-        game->gameState = PLAYER_TURN;
-    }
-}
-
 void drawBoard(Game_context *game, int cursorX)
 {
     const int boardPadding = 100;
@@ -324,7 +274,7 @@ void drawBoard(Game_context *game, int cursorX)
         {
             const int cellX = boardOffsetX + col * cellSize;
             const int cellY = boardOffsetY + row * cellSize;
-            const boardState cellState = game->board[row][col];
+            const BoardState cellState = game->board[row][col];
             // Calculate the position and size of the circle
             const float circleSize = cellSize / 2 - 2;
             const float circleX = cellX + cellSize / 2;
