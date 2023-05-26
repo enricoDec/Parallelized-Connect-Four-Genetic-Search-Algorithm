@@ -1,5 +1,6 @@
 #include "includes/game.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 Game_context initGame(int boardRows, int boardCols, int startingPlayer)
 {
@@ -169,17 +170,20 @@ int checkWin(Game_context game)
     return 0;
 }
 
-Game_context copyGameContext(const Game_context* source) {
+Game_context copyGameContext(const Game_context *source)
+{
     Game_context copy;
     copy.gameWindow = source->gameWindow;
     copy.boardRows = source->boardRows;
     copy.boardCols = source->boardCols;
 
     // Allocate memory for the new board
-    copy.board = (BoardState**)malloc(copy.boardRows * sizeof(BoardState*));
-    for (int i = 0; i < copy.boardRows; i++) {
-        copy.board[i] = (BoardState*)malloc(copy.boardCols * sizeof(BoardState));
-        for (int j = 0; j < copy.boardCols; j++) {
+    copy.board = (BoardState **)malloc(copy.boardRows * sizeof(BoardState *));
+    for (int i = 0; i < copy.boardRows; i++)
+    {
+        copy.board[i] = (BoardState *)malloc(copy.boardCols * sizeof(BoardState));
+        for (int j = 0; j < copy.boardCols; j++)
+        {
             copy.board[i][j] = source->board[i][j];
         }
     }
@@ -189,4 +193,29 @@ Game_context copyGameContext(const Game_context* source) {
     copy.winner = source->winner;
 
     return copy;
+}
+
+void printBoard(Game_context game)
+{
+    for (int i = 0; i < game.boardRows; i++)
+    {
+        for (int j = 0; j < game.boardCols; j++)
+        {
+            BoardState state = game.board[i][j];
+            if (state == EMPTY)
+            {
+                printf("  ");
+            }
+            else if (state == PLAYER)
+            {
+                printf("X ");
+            }
+            else if (state == PC)
+            {
+                printf("O ");
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
 }

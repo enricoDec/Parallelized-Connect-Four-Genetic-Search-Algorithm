@@ -15,6 +15,7 @@ typedef struct
 {
     int *moves;  /**< The moves of the individual */
     int fitness; /**< The fitness of the individual where 0 is the best */
+    BoardState **board; /**< The board of the game */
 } Individual;
 
 /**

@@ -137,4 +137,10 @@ void resetGame(Game_context *game);
  */
 Game_context copyGameContext(const Game_context* source);
 
+/**
+ * @brief Print the board
+ * @param game The game context
+ */
+void printBoard(Game_context game);
+
 #endif // GAME_H

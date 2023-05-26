@@ -1,15 +1,15 @@
 #include "includes/geneticSearch.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 
-#define POPULATION_SIZE 100
-#define TOURNAMENT_SIZE 5
+#define POPULATION_SIZE 500
+#define TOURNAMENT_SIZE 2
 #define CROSSOVER_RATE 0.8
 #define MUTATION_RATE 0.1
-#define MAX_GENERATIONS 100
-#define MAX_MOVES 42
-#define BAD_FITNESS INT32_MAX
-
+#define MAX_GENERATIONS 500
+#define MAX_MOVES 1
+#define BAD_FITNESS INT_MAX
 
 Individual createRandomIndividual(Game_context game)
 {
@@ -31,43 +31,43 @@ void evaluateFitness(Individual *individual, Game_context game)
     {
         bool isMoveValid = doMove(&game, individual->moves[i], PC);
         int result = checkWin(game);
+
         // if move is invalid, fitness = BAD_FITNESS
-        if (isMoveValid)
-        {
-            // first move won fitness = 0, else fitness = number of moves to win.
-            // a draw should be better than a loss
-            if (result == PC)
-            {
-                individual->fitness = i == 0 ? 0 : i;
-                break;
-            }
-            else if (result == PLAYER)
-            {
-                individual->fitness = BAD_FITNESS;
-                break;
-            }
-            else if (result == 3) // draw
-            {
-                individual->fitness = BAD_FITNESS / 2;
-                break;
-            }
-            else if (result == 0) 
-            {
-                // if the move is valid but no end yet add a penalty
-                individual->fitness++;
-            }
-        }
-        else
+        if (!isMoveValid)
         {
             individual->fitness = BAD_FITNESS;
             break;
         }
+
+        // a draw should be better than a loss
+        if (result == PLAYER)
+        {
+            individual->fitness = BAD_FITNESS;
+            break;
+        }
+        else if (result == PC)
+        {
+            individual->fitness = i == 0 ? 0 : -i;
+            break;
+        }
+        else if (result == 3) // draw
+        {
+            individual->fitness--;
+            break;
+        }
+        else if (result == 0)
+        {
+            // if the move is valid but no end yet, decrease fitness reflecting distance to win
+            individual->fitness--;
+        }
+
         // Apply the player's move (random)
         if (!isBoardFull(game))
         {
             int playerMove = rand() % game.boardCols;
             bool isValid = doMove(&game, playerMove, PLAYER);
-            // if move is invalid, generate a new random move (will not loop forever because the board is not full?)
+
+            // if move is invalid, generate a new random move (will not loop forever because the board is not full)
             while (!isValid)
             {
                 // undo the move
@@ -76,7 +76,9 @@ void evaluateFitness(Individual *individual, Game_context game)
                 isValid = doMove(&game, playerMove, PLAYER);
             }
         }
+
         result = checkWin(game);
+
         // Check if the game is finished
         if (result != 0)
         {
@@ -86,16 +88,16 @@ void evaluateFitness(Individual *individual, Game_context game)
                 individual->fitness = BAD_FITNESS;
                 break;
             }
-            // if the PC wins, fitness = number of moves to win
+            // if the PC wins, fitness = 0
             else if (result == PC)
             {
-                individual->fitness = i + 1;
+                individual->fitness = 0;
                 break;
             }
             // if it's a draw, fitness = BAD_FITNESS / 2
             else if (result == 3)
             {
-                individual->fitness = BAD_FITNESS / 2;
+                individual->fitness--;
                 break;
             }
         }
@@ -105,7 +107,6 @@ void evaluateFitness(Individual *individual, Game_context game)
 Individual *tournamentSelection(Individual *population)
 {
     Individual *parents = malloc(2 * sizeof(Individual));
-
     for (int i = 0; i < 2; i++)
     {
         // Randomly select individuals for the tournament
@@ -115,15 +116,16 @@ Individual *tournamentSelection(Individual *population)
             int index = rand() % POPULATION_SIZE;
             tournament[j] = population[index];
         }
-        // Select the fittest individual from the tournament, so with the lowest fitness
-        parents[i] = tournament[0];
+        // Select the fittest individual from the tournament, so the one closer to 0 (fitness can be negative)
+        Individual fittest = tournament[0];
         for (int j = 1; j < TOURNAMENT_SIZE; j++)
         {
-            if (tournament[j].fitness < parents[i].fitness)
+            if (tournament[j].fitness < fittest.fitness)
             {
-                parents[i] = tournament[j];
+                fittest = tournament[j];
             }
         }
+        parents[i] = fittest;
         free(tournament);
     }
     return parents;
@@ -162,20 +164,25 @@ void mutate(Individual *individual, Game_context game)
 
 void reinsertion(Individual *population, Individual offspring)
 {
+    // Find the worst individual in the population
+    Individual worst = population[0];
     int worstIndex = 0;
     for (int i = 1; i < POPULATION_SIZE; i++)
     {
-        if (population[i].fitness < population[worstIndex].fitness)
+        if (population[i].fitness > worst.fitness)
         {
+            worst = population[i];
             worstIndex = i;
         }
     }
-
+    // Replace the worst individual with the offspring
     population[worstIndex] = offspring;
 }
 
 int geneticSearch(Game_context game)
 {
+    // TODO: copy the game context to avoid modifying the original game in each function
+    // each individual should have a copy of the game board
     // Initialize the population
     Individual *population = malloc(POPULATION_SIZE * sizeof(Individual));
     for (int i = 0; i < POPULATION_SIZE; i++)
@@ -207,7 +214,8 @@ int geneticSearch(Game_context game)
     Individual bestIndividual = population[0];
     for (int i = 1; i < POPULATION_SIZE; i++)
     {
-        if (population[i].fitness > bestIndividual.fitness)
+        // The fittest individual is the one closer to 0 (fitness can be negative)
+        if (population[i].fitness < bestIndividual.fitness)
         {
             bestIndividual = population[i];
         }
@@ -219,6 +227,8 @@ int geneticSearch(Game_context game)
     {
         free(population[i].moves);
     }
+    printf("Best move: %d with fitness: %d\n", bestMove, bestIndividual.fitness);
+    printBoard(game);
     free(population);
     cleanupGame(&game);
     return bestMove;
