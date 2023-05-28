@@ -1,5 +1,6 @@
 #include "minunit.h"
 #include "gameTest.c"
+#include "geneticSearchTest.c"
 
 void test_setup(void) {
     /* Nothing */

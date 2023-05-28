@@ -99,25 +99,25 @@ MU_TEST(test_isBoardFull)
 MU_TEST(test_doMove)
 {
     Game_context game = initGame(6, 7, RANDOM);
-    mu_assert(doMove(&game, 0, PLAYER) == TRUE, "move should be made");
+    mu_assert(doMove(&game, 0, PLAYER) == 1, "move should be made");
     // fill the column 0
     for (int i = 0; i < game.boardRows - 1; i++)
     {
-        mu_assert(doMove(&game, 0, PLAYER) == TRUE, "move should be made");
+        mu_assert(doMove(&game, 0, PLAYER) == 1, "move should be made");
     }
     // try to make a move in the filled column
-    mu_assert(doMove(&game, 0, PLAYER) == FALSE, "move should not be made");
+    mu_assert(doMove(&game, 0, PLAYER) == 0, "move should not be made");
     // try to make a move in a column that does not exist
-    mu_assert(doMove(&game, 10, PLAYER) == FALSE, "move should not be made");
+    mu_assert(doMove(&game, 10, PLAYER) == 0, "move should not be made");
     // try to make a move in a column that is negative
-    mu_assert(doMove(&game, -1, PLAYER) == FALSE, "move should not be made");
+    mu_assert(doMove(&game, -1, PLAYER) == 0, "move should not be made");
     // try to make a move that wins the game, on new board
     changeBoard(&game, 4, 4);
     for (int i = 0; i < 3; i++)
     {
         doMove(&game, 0, PLAYER);
     }
-    mu_assert(doMove(&game, 0, PLAYER) == TRUE, "move should be made");
+    mu_assert(doMove(&game, 0, PLAYER) == 1, "move should be made");
     mu_assert(game.winner == PLAYER, "winner should be PLAYER");
     mu_assert(game.gameWindow == FINISH, "gameWindow should be FINISH");
     mu_assert(game.gameState == PC_TURN, "gameState should be POST_GAME");
@@ -134,11 +134,11 @@ MU_TEST(test_undoMove)
 {
     Game_context game = initGame(6, 7, RANDOM);
     // try to undo a move on an empty column
-    mu_assert(undoMove(&game, 0, PLAYER) == FALSE, "move should not be undone");
+    mu_assert(undoMove(&game, 0, PLAYER) == 0, "move should not be undone");
     // try to undo a move on a column that does not exist
-    mu_assert(undoMove(&game, 10, PLAYER) == FALSE, "move should not be undone");
+    mu_assert(undoMove(&game, 10, PLAYER) == 0, "move should not be undone");
     // try to undo a move on a column that is negative
-    mu_assert(undoMove(&game, -1, PLAYER) == FALSE, "move should not be undone");
+    mu_assert(undoMove(&game, -1, PLAYER) == 0, "move should not be undone");
     // try to undo a move that wins the game, on new board
     changeBoard(&game, 4, 4);
     for (int i = 0; i < 3; i++)
@@ -146,7 +146,7 @@ MU_TEST(test_undoMove)
         doMove(&game, 0, PLAYER);
     }
     doMove(&game, 0, PLAYER);
-    mu_assert(undoMove(&game, 0, PLAYER) == TRUE, "move should be undone");
+    mu_assert(undoMove(&game, 0, PLAYER) == 1, "move should be undone");
     mu_assert(game.winner == EMPTY, "winner should be EMPTY");
     mu_assert(game.gameWindow == GAME, "gameWindow should be GAME");
     mu_assert(game.gameState == PLAYER_TURN, "gameState should be PLAYER_TURN");
