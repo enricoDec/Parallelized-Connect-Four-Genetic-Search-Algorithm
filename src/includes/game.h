@@ -69,7 +69,7 @@ typedef struct
  * @param startingPlayer 0: Random, 1: User, 2: PC
  * @return The game context
  */
-Game_context initGame(int boardRows, int boardCols, int startingPlayer);
+Game_context initGame(int boardRows, int boardCols, StartingPlayer startingPlayer);
 
 /**
  * @brief Change the board size
@@ -81,7 +81,7 @@ Game_context initGame(int boardRows, int boardCols, int startingPlayer);
 void changeBoard(Game_context *game, int newBoardRows, int newBoardCols);
 
 /**
- * @brief Get the starting player
+ * @brief Get the starting player, picks randomly if the starting player is RANDOM
  * @param startingPlayer 0: Random, 1: User, 2: PC
  * @return The starting player (1: User, 2: PC)
  */
@@ -103,12 +103,14 @@ void cleanupGame(Game_context *game);
 bool doMove(Game_context *game, int col, BoardState player);
 
 /**
- * @brief Undo the move for the given column and player
+ * @brief Undo the move for the given column and player. 
+ * The winning state will be reset. 
+ * The current player will be set to the player who made the last move.
  * @param game The game context
  * @param col The column to undo the move
  * @param player The player to undo the move
  */
-void undoMove(Game_context *game, int col, BoardState player);
+bool undoMove(Game_context *game, int col, BoardState player);
 
 /**
  * @brief Check if the board is full
@@ -138,7 +140,7 @@ void resetGame(Game_context *game);
 Game_context copyGameContext(const Game_context* source);
 
 /**
- * @brief Print the board
+ * @brief Print the board, used for debugging.
  * @param game The game context
  */
 void printBoard(Game_context game);

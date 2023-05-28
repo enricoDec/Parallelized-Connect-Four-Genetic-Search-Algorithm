@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-Game_context initGame(int boardRows, int boardCols, int startingPlayer)
+Game_context initGame(int boardRows, int boardCols, StartingPlayer startingPlayer)
 {
     Game_context game;
     game.gameWindow = WELCOME;
@@ -88,6 +88,7 @@ bool doMove(Game_context *game, int col, BoardState player)
             break;
         }
     }
+    if(!valid) return false;
     int win = checkWin(*game);
     if (win != 0)
     {
@@ -104,17 +105,22 @@ bool doMove(Game_context *game, int col, BoardState player)
     return valid;
 }
 
-void undoMove(Game_context *game, int col, BoardState player)
+bool undoMove(Game_context *game, int col, BoardState player)
 {
+    if (col < 0 || col >= game->boardCols)
+        return false;
     for (int row = 0; row < game->boardRows; row++)
     {
         if (game->board[row][col] == player)
         {
             game->board[row][col] = EMPTY;
-            break;
+            game->winner = EMPTY;
+            game->gameWindow = GAME;
+            game->gameState = player == PLAYER ? PLAYER_TURN : PC_TURN;
+            return true;
         }
     }
-    game->gameState = game->gameState == PLAYER_TURN ? PC_TURN : PLAYER_TURN;
+    return false;
 }
 
 int checkWin(Game_context game)
@@ -187,7 +193,6 @@ Game_context copyGameContext(const Game_context *source)
             copy.board[i][j] = source->board[i][j];
         }
     }
-
     copy.startingPlayer = source->startingPlayer;
     copy.gameState = source->gameState;
     copy.winner = source->winner;
@@ -197,23 +202,25 @@ Game_context copyGameContext(const Game_context *source)
 
 void printBoard(Game_context game)
 {
+    printf("\n");
+    printf("|");
+    for (int i = 0; i < game.boardCols; i++)
+    {
+        printf("---|");
+    }
+    printf("\n");
     for (int i = 0; i < game.boardRows; i++)
     {
+        printf("|");
         for (int j = 0; j < game.boardCols; j++)
         {
-            BoardState state = game.board[i][j];
-            if (state == EMPTY)
-            {
-                printf("  ");
-            }
-            else if (state == PLAYER)
-            {
-                printf("X ");
-            }
-            else if (state == PC)
-            {
-                printf("O ");
-            }
+            printf(" %c |", game.board[i][j] == EMPTY ? ' ' : game.board[i][j] == PLAYER ? 'X'
+                                                                                         : '0');
+        }
+        printf("\n|");
+        for (int i = 0; i < game.boardCols; i++)
+        {
+            printf("---|");
         }
         printf("\n");
     }

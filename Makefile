@@ -1,6 +1,6 @@
 CC := gcc
 CFLAGS := $(shell pkg-config --cflags raylib) -g #-Wall -Wextra -Wpedantic -std=c99 -O3
-LDFLAGS := $(shell pkg-config --libs raylib) -lm 
+LDFLAGS := $(shell pkg-config --libs raylib) -lm
 
 SRCDIR := src
 TESTDIR := test
@@ -21,13 +21,14 @@ all: build
 
 build: $(TARGET)
 
+test: CFLAGS += -DTEST
 test: $(TESTTARGET)
 
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(BINDIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-$(TESTTARGET): $(TESTOBJECTS)
+$(TESTTARGET): $(TESTOBJECTS) $(filter-out $(BUILDDIR)/main.o, $(OBJECTS))
 	@mkdir -p $(BINDIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
