@@ -28,7 +28,7 @@ $(TARGET): $(OBJECTS)
 	@mkdir -p $(BINDIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-$(TESTTARGET): $(TESTOBJECTS) $(filter-out $(BUILDDIR)/main.o, $(OBJECTS))
+$(TESTTARGET): $(TESTOBJECTS) $(filter-out $(BUILDDIR)/main.o $(BUILDDIR)/gameUI.o, $(OBJECTS))
 	@mkdir -p $(BINDIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
