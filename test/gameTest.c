@@ -30,6 +30,17 @@ MU_TEST(test_initGame)
 }
 
 /**
+ * @brief Test the cleanupGame function
+ * The board should be freed
+ */
+MU_TEST(test_freeBoard)
+{
+    Game_context game = initGame(6, 7, RANDOM);
+    freeBoard(&game);
+    // no segmentation fault means the board was freed
+}
+
+/**
  * @brief Test the changeBoard function
  * The board should be changed to the correct size
  * The board should be a 2D array of size boardRows x boardCols with all values set to EMPTY
@@ -51,6 +62,35 @@ MU_TEST(test_changeBoard)
 }
 
 /**
+ * @brief Test the copyGameContext function
+ * The game context should be copied correctly
+ */
+MU_TEST(test_copyGameContext)
+{
+    Game_context game = initGame(6, 7, RANDOM);
+    doMove(&game, 0, PLAYER);
+    doMove(&game, 1, PC);
+    game.gameWindow = GAME;
+    game.startingPlayer = COMPUTER;
+    game.gameState = PC_TURN;
+    game.winner = PLAYER;
+    Game_context copy = copyGameContext(&game);
+    mu_assert(copy.gameWindow == GAME, "gameWindow should be GAME");
+    mu_assert(copy.boardRows == 6, "boardRows should be 6");
+    mu_assert(copy.boardCols == 7, "boardCols should be 7");
+    for (int i = 0; i < copy.boardRows; i++)
+    {
+        for (int j = 0; j < copy.boardCols; j++)
+        {
+            mu_assert(copy.board[i][j] == game.board[i][j], "board should be copied correctly");
+        }
+    }
+    mu_assert(copy.startingPlayer == COMPUTER, "startingPlayer should be COMPUTER");
+    mu_assert(copy.gameState == PC_TURN, "gameState should be PC_TURN");
+    mu_assert(copy.winner == PLAYER, "winner should be PLAYER");
+}
+
+/**
  * @brief Test the getStartPlayer function
  * If the startingPlayer parameter is 0, the starting player should be randomly chosen and not 0
  * If the startingPlayer parameter is 1 or 2, the starting player should be the same as the parameter
@@ -60,36 +100,6 @@ MU_TEST(test_getStartPlayer)
     mu_assert(getStartPlayer(0) != 0, "startingPlayer should be randomly chosen");
     mu_assert(getStartPlayer(1) == 1, "startingPlayer should be 1");
     mu_assert(getStartPlayer(2) == 2, "startingPlayer should be 2");
-}
-
-/**
- * @brief Test the cleanupGame function
- * The board should be freed
- */
-MU_TEST(test_cleanupGame)
-{
-    Game_context game = initGame(6, 7, RANDOM);
-    cleanupGame(&game);
-    // no segmentation fault means the board was freed
-}
-
-/**
- * @brief Test the isBoardFull function
- * The board should be full if all values are not EMPTY
- * The board should not be full if any value is EMPTY
- */
-MU_TEST(test_isBoardFull)
-{
-    Game_context game = initGame(6, 7, RANDOM);
-    mu_assert(isBoardFull(game) == 0, "board should not be full");
-    for (int i = 0; i < game.boardRows; i++)
-    {
-        for (int j = 0; j < game.boardCols; j++)
-        {
-            game.board[i][j] = PLAYER;
-        }
-    }
-    mu_assert(isBoardFull(game) == 1, "board should be full");
 }
 
 /**
@@ -151,6 +161,25 @@ MU_TEST(test_undoMove)
     mu_assert(game.winner == EMPTY, "winner should be EMPTY");
     mu_assert(game.gameWindow == GAME, "gameWindow should be GAME");
     mu_assert(game.gameState == PLAYER_TURN, "gameState should be PLAYER_TURN");
+}
+
+/**
+ * @brief Test the isBoardFull function
+ * The board should be full if all values are not EMPTY
+ * The board should not be full if any value is EMPTY
+ */
+MU_TEST(test_isBoardFull)
+{
+    Game_context game = initGame(6, 7, RANDOM);
+    mu_assert(isBoardFull(game) == 0, "board should not be full");
+    for (int i = 0; i < game.boardRows; i++)
+    {
+        for (int j = 0; j < game.boardCols; j++)
+        {
+            game.board[i][j] = PLAYER;
+        }
+    }
+    mu_assert(isBoardFull(game) == 1, "board should be full");
 }
 
 /**
