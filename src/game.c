@@ -19,13 +19,18 @@ Game_context initGame(int boardRows, int boardCols, StartingPlayer startingPlaye
     return game;
 }
 
-void changeBoard(Game_context *game, int newBoardRows, int newBoardCols)
+void freeBoard(Game_context *game)
 {
     for (int i = 0; i < game->boardRows; i++)
     {
         free(game->board[i]);
     }
     free(game->board);
+}
+
+void changeBoard(Game_context *game, int newBoardRows, int newBoardCols)
+{
+    freeBoard(game);
     game->boardRows = newBoardRows;
     game->boardCols = newBoardCols;
     game->board = (BoardState **)malloc(game->boardRows * sizeof(BoardState *));
@@ -33,6 +38,30 @@ void changeBoard(Game_context *game, int newBoardRows, int newBoardCols)
     {
         game->board[i] = (BoardState *)malloc(game->boardCols * sizeof(BoardState));
     }
+}
+
+Game_context copyGameContext(const Game_context *source)
+{
+    Game_context copy;
+    copy.gameWindow = source->gameWindow;
+    copy.boardRows = source->boardRows;
+    copy.boardCols = source->boardCols;
+
+    // Allocate memory for the new board
+    copy.board = (BoardState **)malloc(copy.boardRows * sizeof(BoardState *));
+    for (int i = 0; i < copy.boardRows; i++)
+    {
+        copy.board[i] = (BoardState *)malloc(copy.boardCols * sizeof(BoardState));
+        for (int j = 0; j < copy.boardCols; j++)
+        {
+            copy.board[i][j] = source->board[i][j];
+        }
+    }
+    copy.startingPlayer = source->startingPlayer;
+    copy.gameState = source->gameState;
+    copy.winner = source->winner;
+
+    return copy;
 }
 
 int getStartPlayer(int startingPlayer)
@@ -44,18 +73,9 @@ int getStartPlayer(int startingPlayer)
     return startingPlayer;
 }
 
-void cleanupGame(Game_context *game)
-{
-    for (int i = 0; i < game->boardRows; i++)
-    {
-        free(game->board[i]);
-    }
-    free(game->board);
-}
-
 void resetGame(Game_context *game)
 {
-    cleanupGame(game);
+    freeBoard(game);
     *game = initGame(game->boardRows, game->boardCols, RANDOM);
 }
 
@@ -174,30 +194,6 @@ int checkWin(Game_context game)
         return 3;
     }
     return 0;
-}
-
-Game_context copyGameContext(const Game_context *source)
-{
-    Game_context copy;
-    copy.gameWindow = source->gameWindow;
-    copy.boardRows = source->boardRows;
-    copy.boardCols = source->boardCols;
-
-    // Allocate memory for the new board
-    copy.board = (BoardState **)malloc(copy.boardRows * sizeof(BoardState *));
-    for (int i = 0; i < copy.boardRows; i++)
-    {
-        copy.board[i] = (BoardState *)malloc(copy.boardCols * sizeof(BoardState));
-        for (int j = 0; j < copy.boardCols; j++)
-        {
-            copy.board[i][j] = source->board[i][j];
-        }
-    }
-    copy.startingPlayer = source->startingPlayer;
-    copy.gameState = source->gameState;
-    copy.winner = source->winner;
-
-    return copy;
 }
 
 void printBoard(Game_context game)

@@ -191,7 +191,7 @@ void drawGameWindow(Game_context *game)
         }
         if (game->gameState == PC_TURN)
         {
-            doMove(game, geneticSearch(copyGameContext(game)), PC);
+            doMove(game, geneticSearch(*game), PC);
         }
         DrawText(game->gameState == PLAYER_TURN ? PLAYER_TURN_LABEL : PC_TURN_LABEL, screenWidth * 0.02f, screenHeight * 0.08f, getH1Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
         drawBoard(game, cursorX);

@@ -45,6 +45,7 @@ MU_TEST(test_changeBoard)
         for (int j = 0; j < game.boardCols; j++)
         {
             mu_assert(game.board[i][j] == EMPTY, "board should be initialized with EMPTY");
+            printf("%d ", game.board[i][j]);
         }
     }
 }

@@ -2,31 +2,49 @@ stages:
   - build
   - test
 
+variables:
+  RAYLIB_CACHE_DIR: $CI_PROJECT_DIR/cache/raylib
+  RAYLIB_DEPS_CACHE_DIR: $CI_PROJECT_DIR/cache/raylib-deps
+
+cache:
+  paths:
+    - $RAYLIB_CACHE_DIR
+    - $RAYLIB_DEPS_CACHE_DIR
+
 build:
   stage: build
   image: gcc:latest
   script:
     - apt-get update && apt-get install -y build-essential git cmake
     - apt-get install -y libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev libomp-dev
-    - git clone https://github.com/raysan5/raylib.git raylib
-    - cd raylib
-    - mkdir build && cd build
+    - if [ ! -d "$RAYLIB_DEPS_CACHE_DIR" ]; then git clone https://github.com/raysan5/raylib.git $RAYLIB_DEPS_CACHE_DIR; fi
+    - cd $RAYLIB_DEPS_CACHE_DIR
+    - mkdir -p build && cd build
     - cmake -DBUILD_SHARED_LIBS=ON ..
     - make
     - make install
-    - cd ../..
+    - cd $CI_PROJECT_DIR
+    - if [ ! -d "$RAYLIB_CACHE_DIR" ]; then git clone https://github.com/raysan5/raylib.git $RAYLIB_CACHE_DIR; fi
+    - cd $RAYLIB_CACHE_DIR
+    - git checkout .
+    - git pull
+    - cd src
+    - make raylib
+    - cd ..
+    - make RAYLIB_PATH=$RAYLIB_CACHE_DIR
+    - cd $CI_PROJECT_DIR
     - git clone https://github.com/raysan5/raygui raygui
     - cd raygui
     - mv src/raygui.h src/raygui.c
     - gcc -o raygui.so src/raygui.c -shared -fpic -DRAYGUI_IMPLEMENTATION -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
-    - cd ..
+    - cd $CI_PROJECT_DIR
     - make build
   artifacts:
     paths:
       - bin/app
 
 doxygen_job:
-  stage: build 
+  stage: build
   image: gcc:latest
   script:
     - apt-get update && apt-get install -y doxygen

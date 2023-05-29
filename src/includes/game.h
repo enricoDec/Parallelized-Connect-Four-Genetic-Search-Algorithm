@@ -63,13 +63,19 @@ typedef struct
 } Game_context;
 
 /**
- * @brief Initialize the game context, be sure to call cleanupGame(Game_context *game) to free the memory
+ * @brief Initialize the game context, be sure to call freeBoard(Game_context *game) to free the memory
  * @param boardRows Number of rows in the board
  * @param boardCols Number of columns in the board
  * @param startingPlayer 0: Random, 1: User, 2: PC
  * @return The game context
  */
 Game_context initGame(int boardRows, int boardCols, StartingPlayer startingPlayer);
+
+/**
+ * @brief Free the board
+ * @param game The game context
+ */
+void freeBoard(Game_context *game);
 
 /**
  * @brief Change the board size
@@ -81,17 +87,18 @@ Game_context initGame(int boardRows, int boardCols, StartingPlayer startingPlaye
 void changeBoard(Game_context *game, int newBoardRows, int newBoardCols);
 
 /**
+ * @brief Copy the game context
+ * @param source The source game context
+ * @return The copied game context
+ */
+Game_context copyGameContext(const Game_context* source);
+
+/**
  * @brief Get the starting player, picks randomly if the starting player is RANDOM
  * @param startingPlayer 0: Random, 1: User, 2: PC
  * @return The starting player (1: User, 2: PC)
  */
 int getStartPlayer(int startingPlayer);
-
-/**
- * @brief End the game and free the memory
- * @param game The game context
- */
-void cleanupGame(Game_context *game);
 
 /**
  * @brief Do the move and update the game state, return false if the move is invalid
@@ -109,6 +116,7 @@ bool doMove(Game_context *game, int col, BoardState player);
  * @param game The game context
  * @param col The column to undo the move
  * @param player The player to undo the move
+ * @return true if the move has been undone, false otherwise
  */
 bool undoMove(Game_context *game, int col, BoardState player);
 
@@ -131,13 +139,6 @@ int checkWin(Game_context game);
  * @param game The game context
  */
 void resetGame(Game_context *game);
-
-/**
- * @brief Copy the game context
- * @param source The source game context
- * @return The copied game context
- */
-Game_context copyGameContext(const Game_context* source);
 
 /**
  * @brief Print the board, used for debugging.
