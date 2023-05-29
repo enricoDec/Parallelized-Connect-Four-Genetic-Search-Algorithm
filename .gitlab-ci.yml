@@ -25,13 +25,8 @@ build:
     - make install
     - cd $CI_PROJECT_DIR
     - if [ ! -d "$RAYLIB_CACHE_DIR" ]; then git clone https://github.com/raysan5/raylib.git $RAYLIB_CACHE_DIR; fi
-    - cd $RAYLIB_CACHE_DIR
-    - git checkout .
-    - git pull
-    - cd src
-    - make raylib
-    - cd ..
-    - make RAYLIB_PATH=$RAYLIB_CACHE_DIR
+    - cd $RAYLIB_CACHE_DIR/src
+    - make RAYLIB_RELEASE_PATH=$RAYLIB_CACHE_DIR
     - cd $CI_PROJECT_DIR
     - git clone https://github.com/raysan5/raygui raygui
     - cd raygui
