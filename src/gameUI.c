@@ -7,6 +7,7 @@
 #include "includes/raygui.h" // TODO: fix include
 #pragma GCC diagnostic pop
 #include "includes/geneticSearch.h"
+#include <string.h>
 
 // Global variables
 const bool isDebug = true;
@@ -77,7 +78,11 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
     int screenHeight = GetScreenHeight();
     // Define controls variables
     bool isEditingBoardSizeDropdown = false;
-    int selectedBoardSize = 0; // 0 = 7x6 (default), 1 = 8x8, 2 = 9x7, 3 = 9x9
+    Board_size boardSizes[] = {{6, 7}, {9, 7}, {10, 10}, {15, 15}, {20, 20}};
+    int boardSizesCount = sizeof(boardSizes) / sizeof(boardSizes[0]);
+    int selectedBoardSize = 0;
+    const char * boardSizeDropdownText = getBoardSizesForComboBox(boardSizes, boardSizesCount);
+    printf("%s\n", boardSizeDropdownText);
     bool isEditingStartPlayerDropdown = false;
     int selectedStartPlayer = 0; // 0 = Random (default), 1 = User, 2 = PC
     // style
@@ -142,14 +147,10 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
             isEditingStartPlayerDropdown = !isEditingStartPlayerDropdown;
         }
         DrawText(SELECT_BOARD_SIZE_LABEL, screenWidth * 0.52f, screenHeight * 0.21f, getBodyFont(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-        if (GuiDropdownBox((Rectangle){screenWidth * 0.52f, screenHeight * 0.24f, screenWidth * 0.18f, screenHeight * 0.07f}, "7x6;8x8;9x7;9x9", &selectedBoardSize, isEditingBoardSizeDropdown))
+        if (GuiDropdownBox((Rectangle){screenWidth * 0.52f, screenHeight * 0.24f, screenWidth * 0.18f, screenHeight * 0.07f}, boardSizeDropdownText, &selectedBoardSize, isEditingBoardSizeDropdown))
         {
-            int newBoardRows = selectedBoardSize == 0 ? 6 : selectedBoardSize == 1 ? 8
-                                                        : selectedBoardSize == 2   ? 7
-                                                                                   : 9;
-            int newboardCols = selectedBoardSize == 0 ? 7 : selectedBoardSize == 1 ? 8
-                                                        : selectedBoardSize == 2   ? 9
-                                                                                   : 9;
+            int newBoardRows = boardSizes[selectedBoardSize].boardRows;
+            int newboardCols = boardSizes[selectedBoardSize].boardCols;
             changeBoard(game, newBoardRows, newboardCols);
             isEditingBoardSizeDropdown = !isEditingBoardSizeDropdown;
         }
@@ -449,6 +450,21 @@ void updateFont(int screenWidth)
             GuiSetFont(font);
         }
     }
+}
+
+const char * getBoardSizesForComboBox(Board_size boardSizes[], int boardSizesCount)
+{
+    char *boardSizesForComboBox = (char *)malloc(boardSizesCount * 3 * sizeof(char));
+    for (int i = 0; i < boardSizesCount; i++)
+    {
+        char *boardSize = (char *)malloc(3 * sizeof(char));
+        sprintf(boardSize, "%dx%d", boardSizes[i].boardRows, boardSizes[i].boardCols);
+        strcat(boardSizesForComboBox, boardSize);
+        if (i < boardSizesCount - 1)
+            strcat(boardSizesForComboBox, ";");
+    }
+    const char *boardSizesForComboBoxConst = boardSizesForComboBox;
+    return boardSizesForComboBoxConst;
 }
 
 int getH1Font(void)

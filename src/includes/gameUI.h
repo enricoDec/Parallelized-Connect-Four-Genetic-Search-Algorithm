@@ -9,6 +9,15 @@
  */
 
 /**
+ * @brief The size of the board
+ */
+typedef struct
+{
+    int boardRows; /**< Number of rows in the board */
+    int boardCols; /**< Number of columns in the board */
+} Board_size;
+
+/**
  * Initialize the game UI
  * @param screenWidth The width of the screen
  * @param screenHeight The height of the screen
@@ -77,6 +86,14 @@ void updateStyle(int visualStyleActive, int *prevVisualStyleActive);
  * @param screenWidth The width of the screen
  */
 void updateFont(int screenWidth);
+
+/**
+ * @brief Get the board sizes for the combo box
+ * @param boardSizes The board sizes
+ * @param boardSizesCount The number of board sizes
+ * @return The board sizes for the combo box
+ */
+const char * getBoardSizesForComboBox(Board_size boardSizes[], int boardSizesCount);
 
 /**
  * @brief Get the font size for a heading 1
