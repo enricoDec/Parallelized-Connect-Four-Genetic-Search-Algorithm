@@ -9,13 +9,15 @@ BINDIR := bin
 TARGET := $(BINDIR)/app
 TESTTARGET := $(BINDIR)/test
 
+RELEASE_CFLAGS := $(CFLAGS) -O3 -Wall -DNDEBUG
+
 SOURCES := $(wildcard $(SRCDIR)/*.c)
 OBJECTS := $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(SOURCES))
 
 TESTSOURCES := $(wildcard $(TESTDIR)/*.c)
 TESTOBJECTS := $(patsubst $(TESTDIR)/%.c, $(BUILDDIR)/%.o, $(TESTSOURCES))
 
-.PHONY: all clean build test
+.PHONY: all clean build test release
 
 all: build
 
@@ -23,6 +25,9 @@ build: $(TARGET)
 
 test: CFLAGS += -DTEST
 test: $(TESTTARGET)
+
+release: CFLAGS = $(RELEASE_CFLAGS)
+release: build
 
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(BINDIR)
