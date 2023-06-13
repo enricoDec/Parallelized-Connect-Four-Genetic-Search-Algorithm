@@ -78,11 +78,9 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
     int screenHeight = GetScreenHeight();
     // Define controls variables
     bool isEditingBoardSizeDropdown = false;
-    Board_size boardSizes[] = {{6, 7}, {9, 7}, {10, 10}, {15, 15}, {20, 20}};
-    int boardSizesCount = sizeof(boardSizes) / sizeof(boardSizes[0]);
+    // if board size is changed, remember to string in the combobox: ~line 150
+    Board_size boardSizes[] = {{6, 7}, {9, 7}, {15, 15}, {20, 20}}; 
     int selectedBoardSize = 0;
-    const char * boardSizeDropdownText = getBoardSizesForComboBox(boardSizes, boardSizesCount);
-    printf("%s\n", boardSizeDropdownText);
     bool isEditingStartPlayerDropdown = false;
     int selectedStartPlayer = 0; // 0 = Random (default), 1 = User, 2 = PC
     // style
@@ -147,7 +145,7 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
             isEditingStartPlayerDropdown = !isEditingStartPlayerDropdown;
         }
         DrawText(SELECT_BOARD_SIZE_LABEL, screenWidth * 0.52f, screenHeight * 0.21f, getBodyFont(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-        if (GuiDropdownBox((Rectangle){screenWidth * 0.52f, screenHeight * 0.24f, screenWidth * 0.18f, screenHeight * 0.07f}, boardSizeDropdownText, &selectedBoardSize, isEditingBoardSizeDropdown))
+        if (GuiDropdownBox((Rectangle){screenWidth * 0.52f, screenHeight * 0.24f, screenWidth * 0.18f, screenHeight * 0.07f}, "6x7;9x7;15x15;20x20", &selectedBoardSize, isEditingBoardSizeDropdown))
         {
             int newBoardRows = boardSizes[selectedBoardSize].boardRows;
             int newboardCols = boardSizes[selectedBoardSize].boardCols;
@@ -171,6 +169,7 @@ void drawGameWindow(Game_context *game)
     int cursorX = 0;
     while (!WindowShouldClose())
     {
+        // todo: if game finished show winning move for a few secs
         if (game->gameWindow == FINISH)
             return;
         screenWidth = GetScreenWidth();
@@ -452,7 +451,7 @@ void updateFont(int screenWidth)
     }
 }
 
-const char * getBoardSizesForComboBox(Board_size boardSizes[], int boardSizesCount)
+const char *getBoardSizesForComboBox(Board_size boardSizes[], int boardSizesCount)
 {
     char *boardSizesForComboBox = (char *)malloc(boardSizesCount * 3 * sizeof(char));
     for (int i = 0; i < boardSizesCount; i++)

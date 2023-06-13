@@ -1,6 +1,6 @@
 CC := gcc
-CFLAGS := $(shell pkg-config --cflags raylib) -g #-Wall -Wextra -Wpedantic -std=c99 -O3
-LDFLAGS := $(shell pkg-config --libs raylib) -lm
+CFLAGS := $(shell pkg-config --cflags raylib) -g -fopenmp #-Wall -Wextra -Wpedantic -std=c99 -O3
+LDFLAGS := $(shell pkg-config --libs raylib) -lm -fopenmp
 
 SRCDIR := src
 TESTDIR := test

@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <omp.h>
 
-#define POPULATION_SIZE 500
+#define POPULATION_SIZE 1000
 #define TOURNAMENT_SIZE 2
 #define CROSSOVER_RATE 0.8
 #define MUTATION_RATE 0.1
-#define MAX_GENERATIONS 500
-#define MAX_MOVES 1
+#define MAX_GENERATIONS 1000
+#define MAX_MOVES 4
 #define BAD_FITNESS INT_MAX
 
 Individual createRandomIndividual(Game_context game)
@@ -27,8 +28,6 @@ Individual createRandomIndividual(Game_context game)
 
 void evaluateFitness(Individual *individual)
 {
-    // TODO check if the individual is already evaluated and check player turn logic
-    // Apply the moves of the individual to the game
     for (int i = 0; i < MAX_MOVES; i++)
     {
         Game_context game = individual->game;
@@ -38,7 +37,7 @@ void evaluateFitness(Individual *individual)
         // if move is invalid, fitness = BAD_FITNESS
         if (!isMoveValid)
         {
-            individual->fitness = BAD_FITNESS;
+            individual->fitness = BAD_FITNESS; // TODO: board could be full so dont penalize for that, since game over
             break;
         }
 
@@ -68,7 +67,7 @@ void evaluateFitness(Individual *individual)
         if (!isBoardFull(game))
         {
             int playerWinMove = -1;
-            int lastValidMove = -1;
+            int lastValidMove = -1; // TODO: we always take the last player move like this if no win move is found
             for (int j = 0; j < game.boardCols; j++)
             {
                 bool isMoveValid = doMove(&game, j, PLAYER);
