@@ -28,8 +28,16 @@ Individual createRandomIndividual(Game_context game)
 
 void evaluateFitness(Individual *individual)
 {
+    bool terminate = false; // Shared flag variable
+
+#pragma omp parallel for
     for (int i = 0; i < MAX_MOVES; i++)
     {
+        if (terminate)
+        {
+            continue; // Skip iterations if termination condition is met
+        }
+
         Game_context game = individual->game;
         bool isMoveValid = doMove(&game, individual->moves[i], PC);
         int result = checkWin(game);
@@ -37,30 +45,48 @@ void evaluateFitness(Individual *individual)
         // if move is invalid, fitness = BAD_FITNESS
         if (!isMoveValid)
         {
-            individual->fitness = BAD_FITNESS; // TODO: board could be full so dont penalize for that, since game over
-            break;
+#pragma omp critical
+            {
+                individual->fitness = BAD_FITNESS; // TODO: board could be full so dont penalize for that, since game over
+                terminate = true;                  // Set termination flag
+            }
+            continue;
         }
 
         // a draw should be better than a loss
         if (result == PLAYER)
         {
-            individual->fitness = BAD_FITNESS;
-            break;
+#pragma omp critical
+            {
+                individual->fitness = BAD_FITNESS;
+                terminate = true; // Set termination flag
+            }
+            continue;
         }
         else if (result == PC)
         {
-            individual->fitness = i == 0 ? 0 : -i;
-            break;
+#pragma omp critical
+            {
+                individual->fitness = i == 0 ? 0 : -i;
+                terminate = true; // Set termination flag
+            }
+            continue;
         }
         else if (result == 3) // draw
         {
-            individual->fitness--;
-            break;
+#pragma omp critical
+            {
+                individual->fitness--;
+            }
+            continue;
         }
         else if (result == 0)
         {
-            // if the move is valid but no end yet, decrease fitness reflecting distance to win
-            individual->fitness--;
+// if the move is valid but no end yet, decrease fitness reflecting distance to win
+#pragma omp critical
+            {
+                individual->fitness--;
+            }
         }
 
         // Apply the player's move, try all the columns and choose one that leads to player win or if none wins choose a valid move
@@ -73,16 +99,22 @@ void evaluateFitness(Individual *individual)
                 bool isMoveValid = doMove(&game, j, PLAYER);
                 int result = checkWin(game);
                 undoMove(&game, j, PLAYER);
-                if(result == PLAYER) {
+                if (result == PLAYER)
+                {
                     playerWinMove = j;
                     break;
-                } else if(isMoveValid) {
+                }
+                else if (isMoveValid)
+                {
                     lastValidMove = j;
                 }
             }
-            if(playerWinMove != -1) {
+            if (playerWinMove != -1)
+            {
                 doMove(&game, playerWinMove, PLAYER);
-            } else {
+            }
+            else
+            {
                 // since board is not full, there must be a valid move
                 doMove(&game, lastValidMove, PLAYER);
             }
@@ -94,20 +126,31 @@ void evaluateFitness(Individual *individual)
             // if the player wins, fitness = BAD_FITNESS
             if (result == PLAYER)
             {
-                individual->fitness = BAD_FITNESS;
-                break;
+#pragma omp critical
+                {
+                    individual->fitness = BAD_FITNESS;
+                    terminate = true; // Set termination flag
+                }
+                continue;
             }
             // if the PC wins, fitness = 0
             else if (result == PC)
             {
-                individual->fitness = 0;
-                break;
+#pragma omp critical
+                {
+                    individual->fitness = 0;
+                    terminate = true; // Set termination flag
+                }
+                continue;
             }
             // if it's a draw, fitness = BAD_FITNESS / 2
             else if (result == 3)
             {
-                individual->fitness--;
-                break;
+#pragma omp critical
+                {
+                    individual->fitness--;
+                }
+                continue;
             }
         }
     }
@@ -233,6 +276,7 @@ Individual getBestIndividual(Individual *population)
 
 int geneticSearch(Game_context game)
 {
+    omp_set_num_threads(4);
     // Initialize the population
     game = copyGameContext(&game);
     Individual *population = malloc(POPULATION_SIZE * sizeof(Individual));
