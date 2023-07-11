@@ -79,8 +79,8 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
     // Define controls variables
     bool isEditingBoardSizeDropdown = false;
     // if board size is changed, remember to string in the combobox: ~line 150
-    Board_size boardSizes[] = {{6, 7}, {9, 7}, {15, 15}, {20, 20}}; 
-    int selectedBoardSize = 0;
+    Board_size boardSizes[] = {{6, 7}, {9, 7}, {15, 15}, {20, 20}};
+    int selectedBoardSize = 0; // todo: load board size from context
     bool isEditingStartPlayerDropdown = false;
     int selectedStartPlayer = 0; // 0 = Random (default), 1 = User, 2 = PC
     // style
@@ -165,13 +165,16 @@ void drawGameWindow(Game_context *game)
     int screenHeight = GetScreenHeight();
     const char *PLAYER_TURN_LABEL = "Your turn";
     const char *PC_TURN_LABEL = "PC turn";
-
     int cursorX = 0;
+    int frameCounter = 0;
     while (!WindowShouldClose())
     {
-        // todo: if game finished show winning move for a few secs
         if (game->gameWindow == FINISH)
+        {
+            // cheese way to show the board after the game is finished (I'm not proud of this)
+            WaitTime(1);
             return;
+        }
         screenWidth = GetScreenWidth();
         screenHeight = GetScreenHeight();
         updateFont(screenWidth);
@@ -207,7 +210,7 @@ void drawFinishWindow(Game_context *game)
     const char *PLAYER_WON_LABEL = game->winner == PLAYER ? "You won!" : game->winner == PC ? "PC won!"
                                                                                             : "Draw!";
     const char *TITLE = "Game finished";
-    const char *PRESS_ENTER_LABEL = "Press enter to continue";
+    const char *PRESS_ENTER_LABEL = "Press enter to continue!";
     // Animated gif
     int animFrames = 0;
     ChangeDirectory(GetApplicationDirectory());
@@ -233,16 +236,15 @@ void drawFinishWindow(Game_context *game)
 
         BeginDrawing();
         ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
-        DrawText(TITLE, screenWidth / 2 - MeasureText(TITLE, getH1Font()) / 2, screenHeight * 0.10f, getH1Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-        DrawText(PLAYER_WON_LABEL, screenWidth / 2 - MeasureText(PLAYER_WON_LABEL, getH2Font()) / 2, screenHeight * 0.15f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-        drawAnimatedGif(&frameCounter, &currentAnimFrame, frameDelay, animFrames, nextFrameDataOffset, gifTexture, gifImage, screenWidth / 2, screenHeight / 2 * 0.55f);
-        // Draw PRESS_ENTER_LABEL Text but with blinking effect
-        static int framesCounter = 0;
-        framesCounter++;
-        if ((framesCounter / 30) % 2)
-        {
-            DrawText(PRESS_ENTER_LABEL, screenWidth / 2 - MeasureText(PRESS_ENTER_LABEL, getH2Font()) / 2, screenHeight * 0.85f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-        }
+            DrawText(TITLE, screenWidth / 2 - MeasureText(TITLE, getH1Font()) / 2, screenHeight * 0.10f, getH1Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+            DrawText(PLAYER_WON_LABEL, screenWidth / 2 - MeasureText(PLAYER_WON_LABEL, getH2Font()) / 2, screenHeight * 0.15f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+            drawAnimatedGif(&frameCounter, &currentAnimFrame, frameDelay, animFrames, nextFrameDataOffset, gifTexture, gifImage, screenWidth / 2, screenHeight / 2 * 0.55f);
+            static int framesCounter = 0;
+            framesCounter++;
+            if ((framesCounter / 30) % 2)
+            {
+                DrawText(PRESS_ENTER_LABEL, screenWidth / 2 - MeasureText(PRESS_ENTER_LABEL, getH2Font()) / 2, screenHeight * 0.85f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+            }
         EndDrawing();
     }
     CloseWindow();

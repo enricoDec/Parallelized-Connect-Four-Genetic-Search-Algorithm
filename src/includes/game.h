@@ -29,7 +29,7 @@ typedef enum
 } BoardState;
 
 /**
- * @brief The game state, used to determine the current player. 
+ * @brief The game state, used to determine the current player.
  */
 typedef enum
 {
@@ -91,7 +91,7 @@ void changeBoard(Game_context *game, int newBoardRows, int newBoardCols);
  * @param source The source game context
  * @return The copied game context
  */
-Game_context copyGameContext(const Game_context* source);
+Game_context copyGameContext(const Game_context *source);
 
 /**
  * @brief Get the starting player, picks randomly if the starting player is RANDOM
@@ -110,8 +110,8 @@ int getStartPlayer(int startingPlayer);
 bool doMove(Game_context *game, int col, BoardState player);
 
 /**
- * @brief Undo the move for the given column and player. 
- * The winning state will be reset. 
+ * @brief Undo the move for the given column and player.
+ * The winning state will be reset.
  * The current player will be set to the player who made the last move.
  * @param game The game context
  * @param col The column to undo the move
@@ -145,5 +145,20 @@ void resetGame(Game_context *game);
  * @param game The game context
  */
 void printBoard(Game_context game);
+
+/**
+ * @brief Get a random valid move
+ * @param game The game context
+ * @return The column of the random valid move
+ */
+int getRandomValidMove(Game_context *game);
+
+/**
+ * @brief Check if the move is valid
+ * @param game The game context
+ * @param col The column to place the piece
+ * @return true if the move is valid, false otherwise
+ */
+int isMoveValid(Game_context *game, int col);
 
 #endif // GAME_H

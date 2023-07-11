@@ -76,7 +76,7 @@ int getStartPlayer(int startingPlayer)
 void resetGame(Game_context *game)
 {
     freeBoard(game);
-    *game = initGame(game->boardRows, game->boardCols, RANDOM);
+    *game = initGame(7, 6, RANDOM);
 }
 
 bool isBoardFull(Game_context game)
@@ -108,7 +108,8 @@ bool doMove(Game_context *game, int col, BoardState player)
             break;
         }
     }
-    if(!valid) return false;
+    if (!valid)
+        return false;
     int win = checkWin(*game);
     if (win != 0)
     {
@@ -221,4 +222,45 @@ void printBoard(Game_context game)
         printf("\n");
     }
     printf("\n");
+}
+
+int getRandomValidMove(Game_context *game)
+{
+    int boardCols = game->boardCols;
+    int validMoves[boardCols];
+    int validMovesCount = 0;
+
+    // Find all valid moves
+    for (int col = 0; col < boardCols; col++)
+    {
+        if (isMoveValid(game, col))
+        {
+            validMoves[validMovesCount++] = col;
+        }
+    }
+
+    // Select a random valid move
+    if (validMovesCount > 0)
+    {
+        int randomIndex = rand() % validMovesCount;
+        return validMoves[randomIndex];
+    }
+
+    // No valid moves available
+    return -1;
+}
+
+int isMoveValid(Game_context *game, int col)
+{
+    if (col < 0 || col >= game->boardCols)
+    {
+        return false;
+    }
+
+    if (game->board[0][col] != EMPTY)
+    {
+        return false;
+    }
+
+    return true;
 }

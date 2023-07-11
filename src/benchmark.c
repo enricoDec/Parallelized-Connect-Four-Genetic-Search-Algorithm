@@ -1,38 +1,30 @@
 #include "includes/benchmark.h"
 
 #include <stdio.h>
+#include <sys/time.h>
 #include <stdlib.h>
 
-static long long start_time;
-static long long end_time;
+struct timespec start, end;
 
-char *millis_to_time(long long millis)
+void benchmark_start(void)
 {
-    // Convert milliseconds to seconds and millis as formatted string
-    int seconds = (millis % 60000) / 1000;
-    int milliseconds = millis % 1000;
-    char *time = malloc(10 * sizeof(char));
-    sprintf(time, "%d.%dms", seconds, milliseconds);
-    return time;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 }
 
-void benchmark_start()
+void benchmark_end(void)
 {
-    start_time = get_time();
+    clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 }
 
-void benchmark_end()
+void benchmark_print(void)
 {
-    end_time = get_time();
-}
-
-void benchmark_print()
-{
-    long long elapsed_time = end_time - start_time;
-    char *time = millis_to_time(elapsed_time);
-    // write to file the time
-    FILE *file = fopen("benchmark.txt", "a");
-    fprintf(file, "%s\n", time);
-    fclose(file);
-    free(time);
+    double time_taken;
+    time_taken = (end.tv_sec - start.tv_sec) * 1000.0;
+    time_taken += (end.tv_nsec - start.tv_nsec) / 1e6;
+    printf("Time taken: %fms\n", time_taken);
+    // wirte to file for plotting
+    FILE *fp;
+    fp = fopen("benchmark.txt", "a");
+    fprintf(fp, "%fms\n", time_taken);
+    fclose(fp);
 }
