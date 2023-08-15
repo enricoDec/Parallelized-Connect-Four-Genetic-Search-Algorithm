@@ -25,6 +25,18 @@ MU_TEST_SUITE(test_suite)
     MU_RUN_TEST(test_undoMove);
     MU_RUN_TEST(test_isBoardFull);
     MU_RUN_TEST(test_checkWin);
+
+    MU_RUN_TEST(test_worstFitness);
+    MU_RUN_TEST(test_bestFitness);
+    MU_RUN_TEST(test_setRemainingMovesToEmpty);
+    MU_RUN_TEST(test_createRandomIndividual);
+    MU_RUN_TEST(test_getBestIndividual);
+    MU_RUN_TEST(test_evaluateFitness);
+    MU_RUN_TEST(test_reinsertion);
+    MU_RUN_TEST(test_mutate);
+    MU_RUN_TEST(test_crossover);
+    MU_RUN_TEST(test_tournamentSelection);
+    MU_RUN_TEST(test_geneticSearch);
 }
 
 int main(int argc, char *argv[])

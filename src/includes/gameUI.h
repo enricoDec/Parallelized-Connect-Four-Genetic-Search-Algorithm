@@ -88,14 +88,6 @@ void updateStyle(int visualStyleActive, int *prevVisualStyleActive);
 void updateFont(int screenWidth);
 
 /**
- * @brief Get the board sizes for the combo box
- * @param boardSizes The board sizes
- * @param boardSizesCount The number of board sizes
- * @return The board sizes for the combo box
- */
-const char * getBoardSizesForComboBox(Board_size boardSizes[], int boardSizesCount);
-
-/**
  * @brief Get the font size for a heading 1
  * @return The heading 1 font size
  */

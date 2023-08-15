@@ -166,7 +166,6 @@ void drawGameWindow(Game_context *game)
     const char *PLAYER_TURN_LABEL = "Your turn";
     const char *PC_TURN_LABEL = "PC turn";
     int cursorX = 0;
-    int frameCounter = 0;
     while (!WindowShouldClose())
     {
         if (game->gameWindow == FINISH)
@@ -451,21 +450,6 @@ void updateFont(int screenWidth)
             GuiSetFont(font);
         }
     }
-}
-
-const char *getBoardSizesForComboBox(Board_size boardSizes[], int boardSizesCount)
-{
-    char *boardSizesForComboBox = (char *)malloc(boardSizesCount * 3 * sizeof(char));
-    for (int i = 0; i < boardSizesCount; i++)
-    {
-        char *boardSize = (char *)malloc(3 * sizeof(char));
-        sprintf(boardSize, "%dx%d", boardSizes[i].boardRows, boardSizes[i].boardCols);
-        strcat(boardSizesForComboBox, boardSize);
-        if (i < boardSizesCount - 1)
-            strcat(boardSizesForComboBox, ";");
-    }
-    const char *boardSizesForComboBoxConst = boardSizesForComboBox;
-    return boardSizesForComboBoxConst;
 }
 
 int getH1Font(void)
