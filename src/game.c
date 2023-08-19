@@ -76,7 +76,7 @@ int getStartPlayer(int startingPlayer)
 void resetGame(Game_context *game)
 {
     freeBoard(game);
-    *game = initGame(7, 6, RANDOM);
+    *game = initGame(game->boardRows, game->boardCols, game->startingPlayer);
 }
 
 bool isBoardFull(Game_context game)

@@ -85,9 +85,21 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
     bool isEditingBoardSizeDropdown = false;
     // if board size is changed, remember to string in the combobox: ~line 150
     Board_size boardSizes[] = {{6, 7}, {9, 7}, {15, 15}, {20, 20}};
-    int selectedBoardSize = 0; // todo: load board size from context
+    int selectedBoardSize = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        if (game->boardRows == boardSizes[i].boardRows && game->boardCols == boardSizes[i].boardCols)
+        {
+            selectedBoardSize = i;
+            break;
+        }
+    }
     bool isEditingStartPlayerDropdown = false;
     int selectedStartPlayer = 0; // 0 = Random (default), 1 = User, 2 = PC
+    if (game->startingPlayer == 1)
+        selectedStartPlayer = 1;
+    else if (game->startingPlayer == 2)
+        selectedStartPlayer = 2;
     // style
     int visualStyleActive = 0;
     while (!WindowShouldClose())
@@ -203,15 +215,17 @@ void drawGenSearchSettingWindow(Game_context *game)
         DrawText("Genetic Search Settings", screenWidth / 2 - MeasureText("Genetic Search Settings", getH1Font()) / 2, screenHeight * 0.08f, getH1Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
         // Population size
         DrawText(POPULATION_SIZE_LABEL, screenWidth * 0.03f, screenHeight * 0.25f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-        if(GuiValueBox((Rectangle){screenWidth * 0.03f, screenHeight * 0.3f, screenWidth * 0.18f, screenHeight * 0.04f}, NULL, populationSize, 1, 10000, isEditingPopulationSize)) isEditingPopulationSize = !isEditingPopulationSize;
+        if (GuiValueBox((Rectangle){screenWidth * 0.03f, screenHeight * 0.3f, screenWidth * 0.18f, screenHeight * 0.04f}, NULL, populationSize, 1, 10000, isEditingPopulationSize))
+            isEditingPopulationSize = !isEditingPopulationSize;
         // Max generations
         DrawText(MAX_GENERATIONS_LABEL, screenWidth * 0.03f, screenHeight * 0.41f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-        if(GuiValueBox((Rectangle){screenWidth * 0.03f, screenHeight * 0.46f, screenWidth * 0.18f, screenHeight * 0.04f}, NULL, maxGenerations, 1, 10000, isEditingMaxGenerations)) isEditingMaxGenerations = !isEditingMaxGenerations;
+        if (GuiValueBox((Rectangle){screenWidth * 0.03f, screenHeight * 0.46f, screenWidth * 0.18f, screenHeight * 0.04f}, NULL, maxGenerations, 1, 10000, isEditingMaxGenerations))
+            isEditingMaxGenerations = !isEditingMaxGenerations;
         // Max moves
         DrawText(MAX_MOVES_LABEL, screenWidth * 0.03f, screenHeight * 0.57f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-        if(GuiValueBox((Rectangle){screenWidth * 0.03f, screenHeight * 0.62f, screenWidth * 0.18f, screenHeight * 0.04f}, NULL, maxMoves, 1, 10000, isEditingMaxMoves)) isEditingMaxMoves = !isEditingMaxMoves;
-        
-        
+        if (GuiValueBox((Rectangle){screenWidth * 0.03f, screenHeight * 0.62f, screenWidth * 0.18f, screenHeight * 0.04f}, NULL, maxMoves, 1, 10000, isEditingMaxMoves))
+            isEditingMaxMoves = !isEditingMaxMoves;
+
         // Crossover rate
         DrawText(CROSSOVER_RATE_LABEL, screenWidth * 0.80f, screenHeight * 0.25f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
         *crossoverRate = GuiSlider((Rectangle){screenWidth * 0.80f, screenHeight * 0.33f, screenWidth * 0.18f, screenHeight * 0.02f}, NULL, NULL, *crossoverRate, 0.0f, 1.0f);
@@ -220,7 +234,7 @@ void drawGenSearchSettingWindow(Game_context *game)
         DrawText(MUTATION_RATE_LABEL, screenWidth * 0.80f, screenHeight * 0.41f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
         *mutationRate = GuiSlider((Rectangle){screenWidth * 0.80f, screenHeight * 0.49f, screenWidth * 0.18f, screenHeight * 0.02f}, NULL, NULL, *mutationRate, 0.0f, 1.0f);
         DrawText(TextFormat("%.2f", *mutationRate), screenWidth * 0.79f - MeasureText(TextFormat("%.2f", *mutationRate), getBodyFont()), screenHeight * 0.49f, getBodyFont(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-        
+
         // Button bottom center to go back
         if (GuiButton((Rectangle){screenWidth / 2 - 100, screenHeight * 0.85f, 200, 50}, "Save and go back"))
         {

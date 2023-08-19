@@ -79,7 +79,7 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
     // Retrieve the best next move
     int bestMove = bestIndividual.moves[0];
     // printf("Best move: %d with fitness: %d\n", bestMove, bestIndividual.fitness);
-    // printBoard(bestIndividual.game);
+    printBoard(bestIndividual.game);
     //   Cleanup
     freeBoard(&game);
     free(population);
