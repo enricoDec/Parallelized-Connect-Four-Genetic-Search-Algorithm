@@ -12,6 +12,7 @@
 // Global variables
 const bool isDebug = true;
 const bool memeMode = true;
+GeneticSearchParameters geneticSearchParameters = {1000, 0.8, 0.1, 100, 3};
 
 /**
  * @brief Draw an animated gif
@@ -48,6 +49,9 @@ void loop(Game_context *game)
         case WELCOME:
             drawWelcomeWindow(game, &prevVisualStyleActive);
             break;
+        case SETTINGS:
+            drawGenSearchSettingWindow(game);
+            break;
         case GAME:
             // flip coin if starting player is random
             if (game->startingPlayer == 0)
@@ -70,6 +74,7 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
 {
     const char *WELCOME_LABEL = "Welcome to Connect Four!";
     const char *START_BUTTON_LABEL = "Start";
+    const char *SETTINGS_BUTTON_LABEL = "Genetic Search Settings";
     const char *SETTINGS_TITLE_LABEL = "Settings";
     const char *SELECT_BOARD_SIZE_LABEL = "Select Board Size:";
     const char *SELECT_START_PLAYER_LABEL = "Select Starting Player:";
@@ -107,6 +112,11 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
         if (GuiButton((Rectangle){screenWidth * 0.07f, screenHeight * 0.26f, screenWidth * 0.2f, screenHeight * 0.1f}, START_BUTTON_LABEL))
         {
             game->gameWindow = GAME;
+            return;
+        }
+        if (GuiButton((Rectangle){screenWidth * 0.07f, screenHeight * 0.42f, screenWidth * 0.2f, screenHeight * 0.05f}, SETTINGS_BUTTON_LABEL))
+        {
+            game->gameWindow = SETTINGS;
             return;
         }
         visualStyleActive = GuiComboBox((Rectangle){screenWidth * 0.07f, screenHeight * 0.88f, screenWidth * 0.18f, screenHeight * 0.07f}, "Default;Jungle;Lavanda;Dark;Bluish;Cyber;Terminal", visualStyleActive);
@@ -159,6 +169,74 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
     CloseWindow();
 }
 
+void drawGenSearchSettingWindow(Game_context *game)
+{
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+    const char *POPULATION_SIZE_LABEL = "Population size:";
+    int *populationSize = malloc(sizeof(int));
+    *populationSize = 1000;
+    bool isEditingPopulationSize = false;
+    const char *CROSSOVER_RATE_LABEL = "Crossover rate:";
+    float *crossoverRate = malloc(sizeof(float));
+    *crossoverRate = 0.8;
+    const char *MUTATION_RATE_LABEL = "Mutation rate:";
+    float *mutationRate = malloc(sizeof(float));
+    *mutationRate = 0.1;
+    const char *MAX_GENERATIONS_LABEL = "Max Generations:";
+    int *maxGenerations = malloc(sizeof(int));
+    *maxGenerations = 100;
+    bool isEditingMaxGenerations = false;
+    const char *MAX_MOVES_LABEL = "Individual genes (moves) count:";
+    int *maxMoves = malloc(sizeof(int));
+    *maxMoves = 3;
+    bool isEditingMaxMoves = false;
+    int cursorX = 0;
+    while (!WindowShouldClose())
+    {
+        screenWidth = GetScreenWidth();
+        screenHeight = GetScreenHeight();
+        updateFont(screenWidth);
+        BeginDrawing();
+        ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
+        // Center Text with Text Genetic Search Settings
+        DrawText("Genetic Search Settings", screenWidth / 2 - MeasureText("Genetic Search Settings", getH1Font()) / 2, screenHeight * 0.08f, getH1Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        // Population size
+        DrawText(POPULATION_SIZE_LABEL, screenWidth * 0.03f, screenHeight * 0.25f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        if(GuiValueBox((Rectangle){screenWidth * 0.03f, screenHeight * 0.3f, screenWidth * 0.18f, screenHeight * 0.04f}, NULL, populationSize, 1, 10000, isEditingPopulationSize)) isEditingPopulationSize = !isEditingPopulationSize;
+        // Max generations
+        DrawText(MAX_GENERATIONS_LABEL, screenWidth * 0.03f, screenHeight * 0.41f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        if(GuiValueBox((Rectangle){screenWidth * 0.03f, screenHeight * 0.46f, screenWidth * 0.18f, screenHeight * 0.04f}, NULL, maxGenerations, 1, 10000, isEditingMaxGenerations)) isEditingMaxGenerations = !isEditingMaxGenerations;
+        // Max moves
+        DrawText(MAX_MOVES_LABEL, screenWidth * 0.03f, screenHeight * 0.57f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        if(GuiValueBox((Rectangle){screenWidth * 0.03f, screenHeight * 0.62f, screenWidth * 0.18f, screenHeight * 0.04f}, NULL, maxMoves, 1, 10000, isEditingMaxMoves)) isEditingMaxMoves = !isEditingMaxMoves;
+        
+        
+        // Crossover rate
+        DrawText(CROSSOVER_RATE_LABEL, screenWidth * 0.80f, screenHeight * 0.25f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        *crossoverRate = GuiSlider((Rectangle){screenWidth * 0.80f, screenHeight * 0.33f, screenWidth * 0.18f, screenHeight * 0.02f}, NULL, NULL, *crossoverRate, 0.0f, 1.0f);
+        DrawText(TextFormat("%.2f", *crossoverRate), screenWidth * 0.79f - MeasureText(TextFormat("%.2f", *crossoverRate), getBodyFont()), screenHeight * 0.33f, getBodyFont(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        // Mutation rate
+        DrawText(MUTATION_RATE_LABEL, screenWidth * 0.80f, screenHeight * 0.41f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        *mutationRate = GuiSlider((Rectangle){screenWidth * 0.80f, screenHeight * 0.49f, screenWidth * 0.18f, screenHeight * 0.02f}, NULL, NULL, *mutationRate, 0.0f, 1.0f);
+        DrawText(TextFormat("%.2f", *mutationRate), screenWidth * 0.79f - MeasureText(TextFormat("%.2f", *mutationRate), getBodyFont()), screenHeight * 0.49f, getBodyFont(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        
+        // Button bottom center to go back
+        if (GuiButton((Rectangle){screenWidth / 2 - 100, screenHeight * 0.85f, 200, 50}, "Save and go back"))
+        {
+            geneticSearchParameters.populationSize = *populationSize;
+            geneticSearchParameters.crossoverRate = *crossoverRate;
+            geneticSearchParameters.mutationRate = *mutationRate;
+            geneticSearchParameters.maxGenerations = *maxGenerations;
+            geneticSearchParameters.maxMoves = *maxMoves;
+            game->gameWindow = WELCOME;
+            return;
+        }
+        EndDrawing();
+    }
+    CloseWindow();
+}
+
 void drawGameWindow(Game_context *game)
 {
     int screenWidth = GetScreenWidth();
@@ -193,7 +271,7 @@ void drawGameWindow(Game_context *game)
         }
         if (game->gameState == PC_TURN)
         {
-            doMove(game, geneticSearch(*game), PC);
+            doMove(game, geneticSearch(*game, geneticSearchParameters), PC);
         }
         DrawText(game->gameState == PLAYER_TURN ? PLAYER_TURN_LABEL : PC_TURN_LABEL, screenWidth * 0.02f, screenHeight * 0.08f, getH1Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
         drawBoard(game, cursorX);
@@ -235,15 +313,15 @@ void drawFinishWindow(Game_context *game)
 
         BeginDrawing();
         ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
-            DrawText(TITLE, screenWidth / 2 - MeasureText(TITLE, getH1Font()) / 2, screenHeight * 0.10f, getH1Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-            DrawText(PLAYER_WON_LABEL, screenWidth / 2 - MeasureText(PLAYER_WON_LABEL, getH2Font()) / 2, screenHeight * 0.15f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-            drawAnimatedGif(&frameCounter, &currentAnimFrame, frameDelay, animFrames, nextFrameDataOffset, gifTexture, gifImage, screenWidth / 2, screenHeight / 2 * 0.55f);
-            static int framesCounter = 0;
-            framesCounter++;
-            if ((framesCounter / 30) % 2)
-            {
-                DrawText(PRESS_ENTER_LABEL, screenWidth / 2 - MeasureText(PRESS_ENTER_LABEL, getH2Font()) / 2, screenHeight * 0.85f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
-            }
+        DrawText(TITLE, screenWidth / 2 - MeasureText(TITLE, getH1Font()) / 2, screenHeight * 0.10f, getH1Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        DrawText(PLAYER_WON_LABEL, screenWidth / 2 - MeasureText(PLAYER_WON_LABEL, getH2Font()) / 2, screenHeight * 0.15f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        drawAnimatedGif(&frameCounter, &currentAnimFrame, frameDelay, animFrames, nextFrameDataOffset, gifTexture, gifImage, screenWidth / 2, screenHeight / 2 * 0.55f);
+        static int framesCounter = 0;
+        framesCounter++;
+        if ((framesCounter / 30) % 2)
+        {
+            DrawText(PRESS_ENTER_LABEL, screenWidth / 2 - MeasureText(PRESS_ENTER_LABEL, getH2Font()) / 2, screenHeight * 0.85f, getH2Font(), GetColor(GuiGetStyle(DEFAULT, TEXT_COLOR_NORMAL)));
+        }
         EndDrawing();
     }
     CloseWindow();

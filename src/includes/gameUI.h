@@ -38,6 +38,12 @@ void loop(Game_context *game);
 void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive);
 
 /**
+ * @brief Draw the main menu window
+ * @param game The game context
+ */
+void drawGenSearchSettingWindow(Game_context *game);
+
+/**
  * @brief Draw the game window
  * @param game The game context
  */

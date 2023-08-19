@@ -14,6 +14,7 @@
 typedef enum
 {
     WELCOME, /**< The welcome window */
+    SETTINGS, /**< The settings window */
     GAME,    /**< The game window */
     FINISH   /**< The finish window */
 } CurrentWindow;

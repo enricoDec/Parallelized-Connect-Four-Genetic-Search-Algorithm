@@ -22,9 +22,10 @@ MU_TEST(test_bestFitness)
 
 MU_TEST(test_setRemainingMovesToEmpty)
 {
+    int maxMoves = 3;
     Game_context game = initGame(6, 6, 1);
-    Individual individual = createRandomIndividual(game);
-    setRemainingMovesToEmpty(&individual, 0);
+    Individual individual = createRandomIndividual(game, maxMoves);
+    setRemainingMovesToEmpty(&individual, 0, maxMoves);
     for (int i = 0; i < 3; i++)
     {
         if (i < 3)
@@ -40,8 +41,9 @@ MU_TEST(test_setRemainingMovesToEmpty)
 
 MU_TEST(test_createRandomIndividual)
 {
+    int maxMoves = 3;
     Game_context game = initGame(6, 6, 1);
-    Individual individual = createRandomIndividual(game);
+    Individual individual = createRandomIndividual(game, maxMoves);
     for (int i = 0; i < 3; i++)
     {
         mu_assert(individual.moves[i] >= 0 && individual.moves[i] < game.boardCols, "individual.moves[i] should be between 0 and game.boardCols");
@@ -50,14 +52,16 @@ MU_TEST(test_createRandomIndividual)
 
 MU_TEST(test_getBestIndividual)
 {
+    int maxMoves = 3;
+    int populationSize = 1000;
     Game_context game = initGame(6, 6, 1);
-    Individual population[1000];
-    for (int i = 0; i < 1000; i++)
+    Individual population[populationSize];
+    for (int i = 0; i < populationSize; i++)
     {
-        population[i] = createRandomIndividual(game);
+        population[i] = createRandomIndividual(game, maxMoves);
     }
-    Individual best = getBestIndividual(population);
-    for (int i = 0; i < 1000; i++)
+    Individual best = getBestIndividual(population, populationSize);
+    for (int i = 0; i < populationSize; i++)
     {
         mu_assert(best.fitness >= population[i].fitness, "best.fitness should be greater than or equal to population[i].fitness");
     }
@@ -65,66 +69,81 @@ MU_TEST(test_getBestIndividual)
 
 MU_TEST(test_evaluateFitness)
 {
+    int maxMoves = 3;
     Game_context game = initGame(6, 6, 1);
-    Individual individual = createRandomIndividual(game);
-    evaluateFitness(&individual);
+    Individual individual = createRandomIndividual(game, maxMoves);
+    evaluateFitness(&individual, maxMoves);
 }
 
 MU_TEST(test_reinsertion)
 {
+    int maxMoves = 3;
+    int populationSize = 1000;
     Game_context game = initGame(6, 6, 1);
-    Individual *oldPopulation = malloc(1000 * sizeof(Individual));
-    for (int i = 0; i < 1000; i++)
+    Individual *oldPopulation = malloc(populationSize * sizeof(Individual));
+    for (int i = 0; i < populationSize; i++)
     {
-        oldPopulation[i] = createRandomIndividual(game);
+        oldPopulation[i] = createRandomIndividual(game, maxMoves);
     }
-    Individual *newPopulation = malloc(1000 * sizeof(Individual));
-    for (int i = 0; i < 1000; i++)
+    Individual *newPopulation = malloc(populationSize * sizeof(Individual));
+    for (int i = 0; i < populationSize; i++)
     {
-        newPopulation[i] = createRandomIndividual(game);
+        newPopulation[i] = createRandomIndividual(game, maxMoves);
     }
-    reinsertion(oldPopulation, newPopulation, game);
-    Individual oldPopulationBestIndividual = getBestIndividual(oldPopulation);
-    Individual newPopulationBestIndividual = getBestIndividual(newPopulation);
-    mu_assert(oldPopulationBestIndividual.fitness == newPopulationBestIndividual.fitness, 
-    "oldPopulationBestIndividual.fitness should be equal to newPopulationBestIndividual.fitness");
+    reinsertion(oldPopulation, newPopulation, game, maxMoves);
+    Individual oldPopulationBestIndividual = getBestIndividual(oldPopulation, populationSize);
+    Individual newPopulationBestIndividual = getBestIndividual(newPopulation, populationSize);
+    mu_assert(oldPopulationBestIndividual.fitness == newPopulationBestIndividual.fitness,
+              "oldPopulationBestIndividual.fitness should be equal to newPopulationBestIndividual.fitness");
 }
 
 MU_TEST(test_mutate)
 {
+    int maxMoves = 3;
+    double mutationRate = 0.1;
     Game_context game = initGame(6, 6, 1);
-    Individual individual = createRandomIndividual(game);
-    mutate(&individual, game.boardCols);
+    Individual individual = createRandomIndividual(game, maxMoves);
+    mutate(&individual, game.boardCols, mutationRate);
 }
 
 MU_TEST(test_crossover)
 {
+    int maxMoves = 3;
+    double crossoverRate = 0.8;
     Game_context game = initGame(6, 6, 1);
-    Individual parent1 = createRandomIndividual(game);
-    Individual parent2 = createRandomIndividual(game);
-    Individual offspring = crossover(parent1, parent2, game);
+    Individual parent1 = createRandomIndividual(game, maxMoves);
+    Individual parent2 = createRandomIndividual(game, maxMoves);
+    Individual offspring = crossover(parent1, parent2, game, crossoverRate);
     for (int i = 0; i < game.boardCols; i++)
     {
-        mu_assert(offspring.moves[i] == parent1.moves[i] || offspring.moves[i] == parent2.moves[i], 
-        "offspring.moves[i] should be equal to parent1.moves[i] or parent2.moves[i]");
+        mu_assert(offspring.moves[i] == parent1.moves[i] || offspring.moves[i] == parent2.moves[i],
+                  "offspring.moves[i] should be equal to parent1.moves[i] or parent2.moves[i]");
     }
 }
 
 MU_TEST(test_tournamentSelection)
 {
+    int maxMoves = 3;
+    int populationSize = 1000;
     Game_context game = initGame(6, 6, 1);
-    Individual population[1000];
-    for (int i = 0; i < 1000; i++)
+    Individual population[populationSize];
+    for (int i = 0; i < populationSize; i++)
     {
-        population[i] = createRandomIndividual(game);
+        population[i] = createRandomIndividual(game, maxMoves);
     }
-    Individual parent = tournamentSelection(population);
-    mu_assert(parent.fitness == getBestIndividual(population).fitness, 
-    "parent.fitness should be equal to getBestIndividual(population).fitness");
+    Individual parent = tournamentSelection(population, populationSize);
+    mu_assert(parent.fitness == getBestIndividual(population, populationSize).fitness,
+              "parent.fitness should be equal to getBestIndividual(population).fitness");
 }
 
 MU_TEST(test_geneticSearch)
 {
     Game_context game = initGame(6, 6, 1);
-    geneticSearch(game);
+    GeneticSearchParameters geneticSearchParameters;
+    geneticSearchParameters.populationSize = 1000;
+    geneticSearchParameters.crossoverRate = 0.8;
+    geneticSearchParameters.mutationRate = 0.1;
+    geneticSearchParameters.maxGenerations = 100;
+    geneticSearchParameters.maxMoves = 3;
+    geneticSearch(game, geneticSearchParameters);
 }

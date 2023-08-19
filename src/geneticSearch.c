@@ -5,68 +5,68 @@
 #include <limits.h>
 #include <omp.h>
 
-#define POPULATION_SIZE 1000
-#define CROSSOVER_RATE 0.8
-#define MUTATION_RATE 0.1
-#define MAX_GENERATIONS 100
-#define MAX_MOVES 3
 #define BAD_FITNESS INT_MAX
 
-int geneticSearch(Game_context game)
+int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParameters)
 {
+    int populationSize = geneticSearchParameters.populationSize;
+    double crossoverRate = geneticSearchParameters.crossoverRate;
+    double mutationRate = geneticSearchParameters.mutationRate;
+    int maxGenerations = geneticSearchParameters.maxGenerations;
+    int maxMoves = geneticSearchParameters.maxMoves;
     // benchmark_start();
     omp_set_num_threads(4);
     // Copy the game context to avoid modifying the original
     game = copyGameContext(&game);
     // Initialize the population
-    Individual *population = malloc(POPULATION_SIZE * sizeof(Individual));
-    # pragma omp parallel for
-    for (int i = 0; i < POPULATION_SIZE; i++)
+    Individual *population = malloc(populationSize * sizeof(Individual));
+    #pragma omp parallel for
+    for (int i = 0; i < populationSize; i++)
     {
-        population[i] = createRandomIndividual(game);
+        population[i] = createRandomIndividual(game, maxMoves);
     }
     // Evaluate the fitness of the initial population
     #pragma omp parallel for
-    for (int i = 0; i < POPULATION_SIZE; i++)
+    for (int i = 0; i < populationSize; i++)
     {
-        evaluateFitness(&population[i]);
+        evaluateFitness(&population[i], maxMoves);
     }
     // Perform the genetic search algorithm
     int generation = 0;
-    while (generation < MAX_GENERATIONS)
+    while (generation < maxGenerations)
     {
         // Select parents using tournament selection
-        Individual *parents = malloc(POPULATION_SIZE * sizeof(Individual));
+        Individual *parents = malloc(populationSize * sizeof(Individual));
         #pragma omp parallel for
-        for (int i = 0; i < POPULATION_SIZE; i++)
+        for (int i = 0; i < populationSize; i++)
         {
-            parents[i] = tournamentSelection(population);
+            parents[i] = tournamentSelection(population, populationSize);
         }
         // Perform crossover for each parent to create offspring
-        Individual *offspring = malloc(POPULATION_SIZE * sizeof(Individual));
+        Individual *offspring = malloc(populationSize * sizeof(Individual));
         #pragma omp parallel for
-        for (int i = 0; i < POPULATION_SIZE; i++)
+        for (int i = 0; i < populationSize; i++)
         {
-            offspring[i] = crossover(parents[i], parents[(i + 1) % POPULATION_SIZE], game);
+            offspring[i] = crossover(parents[i], parents[(i + 1) % populationSize], game, crossoverRate);
         }
         // Mutate the offspring
         #pragma omp parallel for
-        for (int i = 0; i < POPULATION_SIZE; i++)
+        for (int i = 0; i < populationSize; i++)
         {
-            mutate(&offspring[i], game.boardCols);
+            mutate(&offspring[i], game.boardCols, mutationRate);
         }
         // Reinsert the best individual from the previous generation
-        reinsertion(offspring, population, game);
+        reinsertion(offspring, population, game, maxMoves);
         // Evaluate the fitness of the offspring
         #pragma omp parallel for
-        for (int i = 0; i < POPULATION_SIZE; i++)
+        for (int i = 0; i < populationSize; i++)
         {
-            evaluateFitness(&offspring[i]);
+            evaluateFitness(&offspring[i], maxMoves);
         }
-        for (int i = 0; i < POPULATION_SIZE; i++)
+        for (int i = 0; i < populationSize; i++)
         {
-            //freeBoard(&population[i].game);
-            //free(population[i].moves);
+            // freeBoard(&population[i].game);
+            // free(population[i].moves);
         }
         free(population);
         // Replace the population with the new one
@@ -75,12 +75,12 @@ int geneticSearch(Game_context game)
         generation++;
     }
     // Find the best next move based on the fittest individual
-    Individual bestIndividual = getBestIndividual(population);
+    Individual bestIndividual = getBestIndividual(population, populationSize);
     // Retrieve the best next move
     int bestMove = bestIndividual.moves[0];
-    //printf("Best move: %d with fitness: %d\n", bestMove, bestIndividual.fitness);
-    //printBoard(bestIndividual.game);
-    //  Cleanup
+    // printf("Best move: %d with fitness: %d\n", bestMove, bestIndividual.fitness);
+    // printBoard(bestIndividual.game);
+    //   Cleanup
     freeBoard(&game);
     free(population);
     // benchmark_end();
@@ -88,23 +88,23 @@ int geneticSearch(Game_context game)
     return bestMove;
 }
 
-Individual tournamentSelection(Individual *population)
+Individual tournamentSelection(Individual *population, int populationSize)
 {
-    int parent1Index = rand() % POPULATION_SIZE;
-    int parent2Index = rand() % POPULATION_SIZE;
+    int parent1Index = rand() % populationSize;
+    int parent2Index = rand() % populationSize;
     // Pick the best individual as parent (the one closer to 0)
     Individual parent = bestFitness(population[parent1Index].fitness, population[parent2Index].fitness) == population[parent1Index].fitness ? population[parent1Index] : population[parent2Index];
     return parent;
 }
 
-Individual crossover(Individual parent1, Individual parent2, Game_context game)
+Individual crossover(Individual parent1, Individual parent2, Game_context game, double crossoverRate)
 {
     Individual offspring;
     int boardCols = game.boardCols;
     offspring.moves = malloc(boardCols * sizeof(int));
     for (int i = 0; i < boardCols; i++)
     {
-        if ((double)rand() / RAND_MAX < CROSSOVER_RATE)
+        if ((double)rand() / RAND_MAX < crossoverRate)
         {
             offspring.moves[i] = parent1.moves[i];
         }
@@ -118,23 +118,23 @@ Individual crossover(Individual parent1, Individual parent2, Game_context game)
     return offspring;
 }
 
-void mutate(Individual *individual, int boardCols)
+void mutate(Individual *individual, int boardCols, double mutationRate)
 {
     for (int i = 0; i < boardCols; i++)
     {
-        if ((double)rand() / RAND_MAX < MUTATION_RATE)
+        if ((double)rand() / RAND_MAX < mutationRate)
         {
             individual->moves[i] = rand() % boardCols;
         }
     }
 }
 
-void reinsertion(Individual *newPopulation, Individual *oldPopulation, Game_context game)
+void reinsertion(Individual *newPopulation, Individual *oldPopulation, Game_context game, int maxMoves)
 {
-    Individual best = getBestIndividual(oldPopulation);
+    Individual best = getBestIndividual(oldPopulation, maxMoves);
     Individual copyBest;
-    copyBest.moves = malloc(MAX_MOVES * sizeof(int));
-    for (int i = 0; i < MAX_MOVES; i++)
+    copyBest.moves = malloc(maxMoves * sizeof(int));
+    for (int i = 0; i < maxMoves; i++)
     {
         copyBest.moves[i] = best.moves[i];
     }
@@ -144,12 +144,12 @@ void reinsertion(Individual *newPopulation, Individual *oldPopulation, Game_cont
     newPopulation[0] = best;
 }
 
-void evaluateFitness(Individual *individual)
+void evaluateFitness(Individual *individual, int maxMoves)
 {
     Game_context game = individual->game;
     int movesToWin = 0;
 
-    for (int i = 0; i < MAX_MOVES; i++)
+    for (int i = 0; i < maxMoves; i++)
     {
         int move = individual->moves[i];
         bool isMoveValid = doMove(&game, move, PC);
@@ -159,7 +159,7 @@ void evaluateFitness(Individual *individual)
         if (!isMoveValid || isBoardFull(game))
         {
             individual->fitness = BAD_FITNESS;
-            setRemainingMovesToEmpty(individual, i + 1);
+            setRemainingMovesToEmpty(individual, i + 1, maxMoves);
             return;
         }
 
@@ -167,7 +167,7 @@ void evaluateFitness(Individual *individual)
         if (result == PC)
         {
             individual->fitness = movesToWin;
-            setRemainingMovesToEmpty(individual, i + 1);
+            setRemainingMovesToEmpty(individual, i + 1, maxMoves);
             return;
         }
 
@@ -187,10 +187,10 @@ void evaluateFitness(Individual *individual)
     individual->fitness = BAD_FITNESS;
 }
 
-Individual getBestIndividual(Individual *population)
+Individual getBestIndividual(Individual *population, int populationSize)
 {
     Individual best = population[0];
-    for (int i = 1; i < POPULATION_SIZE; i++)
+    for (int i = 1; i < populationSize; i++)
     {
         if (population[i].fitness == bestFitness(population[i].fitness, best.fitness))
         {
@@ -200,27 +200,27 @@ Individual getBestIndividual(Individual *population)
     return best;
 }
 
-Individual createRandomIndividual(Game_context game)
+Individual createRandomIndividual(Game_context game, int maxMoves)
 {
     Individual individual;
-    individual.moves = malloc(MAX_MOVES * sizeof(int));
+    individual.moves = malloc(maxMoves * sizeof(int));
     individual.fitness = BAD_FITNESS;
     individual.game = copyGameContext(&game);
     // Create random moves
-    for (int i = 0; i < MAX_MOVES; i++)
+    for (int i = 0; i < maxMoves; i++)
     {
         individual.moves[i] = rand() % game.boardCols;
     }
     return individual;
 }
 
-void setRemainingMovesToEmpty(Individual *individual, int startIndex)
+void setRemainingMovesToEmpty(Individual *individual, int startIndex, int maxMoves)
 {
-    if (startIndex < 0 || startIndex > MAX_MOVES)
+    if (startIndex < 0 || startIndex > maxMoves)
     {
         return;
     }
-    for (int i = startIndex; i < MAX_MOVES; i++)
+    for (int i = startIndex; i < maxMoves; i++)
     {
         individual->moves[i] = EMPTY;
     }
