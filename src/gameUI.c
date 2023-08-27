@@ -12,7 +12,7 @@
 // Global variables
 const bool isDebug = true;
 const bool memeMode = true;
-GeneticSearchParameters geneticSearchParameters = {1000, 0.8, 0.1, 100, 3};
+GeneticSearchParameters geneticSearchParameters = {1000, 0.8, 0.01, 100, 3};
 
 /**
  * @brief Draw an animated gif

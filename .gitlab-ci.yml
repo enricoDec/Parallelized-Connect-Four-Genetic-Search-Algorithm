@@ -36,7 +36,7 @@ build:
     - make build
   artifacts:
     paths:
-      - bin/app
+      - bin/connect4
 
 doxygen_job:
   stage: build

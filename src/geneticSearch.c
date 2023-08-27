@@ -1,5 +1,4 @@
 #include "includes/geneticSearch.h"
-// #include "includes/benchmark.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
@@ -14,8 +13,7 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
     double mutationRate = geneticSearchParameters.mutationRate;
     int maxGenerations = geneticSearchParameters.maxGenerations;
     int maxMoves = geneticSearchParameters.maxMoves;
-    // benchmark_start();
-    omp_set_num_threads(4);
+    omp_set_num_threads(1);
     // Copy the game context to avoid modifying the original
     game = copyGameContext(&game);
     // Initialize the population
@@ -79,12 +77,10 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
     // Retrieve the best next move
     int bestMove = bestIndividual.moves[0];
     // printf("Best move: %d with fitness: %d\n", bestMove, bestIndividual.fitness);
-    printBoard(bestIndividual.game);
+    //printBoard(bestIndividual.game);
     //   Cleanup
     freeBoard(&game);
     free(population);
-    // benchmark_end();
-    // benchmark_print();
     return bestMove;
 }
 
@@ -154,7 +150,6 @@ void evaluateFitness(Individual *individual, int maxMoves)
         int move = individual->moves[i];
         bool isMoveValid = doMove(&game, move, PC);
         int result = checkWin(game);
-
         // If move is invalid or there are no more valid moves, terminate with the worst possible fitness
         if (!isMoveValid || isBoardFull(game))
         {
@@ -162,7 +157,6 @@ void evaluateFitness(Individual *individual, int maxMoves)
             setRemainingMovesToEmpty(individual, i + 1, maxMoves);
             return;
         }
-
         // If the move results in a win, terminate with the corresponding fitness (moves to win)
         if (result == PC)
         {
@@ -170,7 +164,6 @@ void evaluateFitness(Individual *individual, int maxMoves)
             setRemainingMovesToEmpty(individual, i + 1, maxMoves);
             return;
         }
-
         // Apply the player's move
         int playerMove = getRandomValidMove(&game); // TODO: this promotes individuals who randomly got a bad player move and won. Maybe we should use a different strategy. We should try to always pick a good move for the player (maybe run genSearch for next player move)
         // If there are no more valid moves for the player (-1), it means the game is a draw. Just ignore.
@@ -178,7 +171,6 @@ void evaluateFitness(Individual *individual, int maxMoves)
         {
             doMove(&game, playerMove, PLAYER);
         }
-
         // Update the fitness based on the distance to win
         movesToWin++;
     }

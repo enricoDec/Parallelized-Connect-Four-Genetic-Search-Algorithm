@@ -5,6 +5,8 @@ void benchmark_start(void);
 
 void benchmark_end(void);
 
-void benchmark_print(void);
+double get_time_taken(void);
+
+void benchmark_printCol(char *message);
 
 #endif // BENCMARK_H

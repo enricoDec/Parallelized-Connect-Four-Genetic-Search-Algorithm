@@ -6,7 +6,7 @@ SRCDIR := src
 TESTDIR := test
 BUILDDIR := build
 BINDIR := bin
-TARGET := $(BINDIR)/app
+TARGET := $(BINDIR)/connect4
 TESTTARGET := $(BINDIR)/test
 
 RELEASE_CFLAGS := $(CFLAGS) -O3 -Wall -DNDEBUG
