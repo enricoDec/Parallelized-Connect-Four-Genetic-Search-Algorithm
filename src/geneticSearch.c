@@ -13,18 +13,18 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
     double mutationRate = geneticSearchParameters.mutationRate;
     int maxGenerations = geneticSearchParameters.maxGenerations;
     int maxMoves = geneticSearchParameters.maxMoves;
-    omp_set_num_threads(1);
+    int numThreads = 1;
     // Copy the game context to avoid modifying the original
     game = copyGameContext(&game);
     // Initialize the population
     Individual *population = malloc(populationSize * sizeof(Individual));
-    #pragma omp parallel for
+    #pragma omp parallel for num_threads(numThreads)
     for (int i = 0; i < populationSize; i++)
     {
         population[i] = createRandomIndividual(game, maxMoves);
     }
     // Evaluate the fitness of the initial population
-    #pragma omp parallel for
+    #pragma omp parallel for num_threads(numThreads)
     for (int i = 0; i < populationSize; i++)
     {
         evaluateFitness(&population[i], maxMoves);
@@ -35,20 +35,20 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
     {
         // Select parents using tournament selection
         Individual *parents = malloc(populationSize * sizeof(Individual));
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(numThreads)
         for (int i = 0; i < populationSize; i++)
         {
             parents[i] = tournamentSelection(population, populationSize);
         }
         // Perform crossover for each parent to create offspring
         Individual *offspring = malloc(populationSize * sizeof(Individual));
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(numThreads)
         for (int i = 0; i < populationSize; i++)
         {
             offspring[i] = crossover(parents[i], parents[(i + 1) % populationSize], game, crossoverRate);
         }
         // Mutate the offspring
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(numThreads)
         for (int i = 0; i < populationSize; i++)
         {
             mutate(&offspring[i], game.boardCols, mutationRate);
@@ -56,7 +56,7 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
         // Reinsert the best individual from the previous generation
         reinsertion(offspring, population, game, maxMoves);
         // Evaluate the fitness of the offspring
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(numThreads)
         for (int i = 0; i < populationSize; i++)
         {
             evaluateFitness(&offspring[i], maxMoves);
@@ -76,9 +76,7 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
     Individual bestIndividual = getBestIndividual(population, populationSize);
     // Retrieve the best next move
     int bestMove = bestIndividual.moves[0];
-    // printf("Best move: %d with fitness: %d\n", bestMove, bestIndividual.fitness);
-    //printBoard(bestIndividual.game);
-    //   Cleanup
+    // Cleanup
     freeBoard(&game);
     free(population);
     return bestMove;
@@ -153,15 +151,22 @@ void evaluateFitness(Individual *individual, int maxMoves)
         // If move is invalid or there are no more valid moves, terminate with the worst possible fitness
         if (!isMoveValid || isBoardFull(game))
         {
-            individual->fitness = BAD_FITNESS;
-            setRemainingMovesToEmpty(individual, i + 1, maxMoves);
+            // Use an OpenMP critical section to update fitness
+            #pragma omp critical
+            {
+                individual->fitness = BAD_FITNESS;
+                setRemainingMovesToEmpty(individual, i + 1, maxMoves);
+            }
             return;
         }
         // If the move results in a win, terminate with the corresponding fitness (moves to win)
         if (result == PC)
         {
-            individual->fitness = movesToWin;
-            setRemainingMovesToEmpty(individual, i + 1, maxMoves);
+            #pragma omp critical
+            {
+                individual->fitness = movesToWin;
+                setRemainingMovesToEmpty(individual, i + 1, maxMoves);
+            }
             return;
         }
         // Apply the player's move
@@ -174,9 +179,11 @@ void evaluateFitness(Individual *individual, int maxMoves)
         // Update the fitness based on the distance to win
         movesToWin++;
     }
-
     // If all moves are exhausted, terminate with the worst possible fitness
-    individual->fitness = BAD_FITNESS;
+    #pragma omp critical
+    {
+        individual->fitness = BAD_FITNESS;
+    }
 }
 
 Individual getBestIndividual(Individual *population, int populationSize)

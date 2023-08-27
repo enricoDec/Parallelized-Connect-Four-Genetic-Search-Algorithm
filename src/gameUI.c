@@ -79,8 +79,8 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
     const char *SELECT_BOARD_SIZE_LABEL = "Select Board Size:";
     const char *SELECT_START_PLAYER_LABEL = "Select Starting Player:";
     const char *CHOOSE_STYLE_LABEL = "Choose Style:";
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    int screenWidth;
+    int screenHeight;
     // Define controls variables
     bool isEditingBoardSizeDropdown = false;
     // if board size is changed, remember to string in the combobox: ~line 150
@@ -183,8 +183,8 @@ void drawWelcomeWindow(Game_context *game, int *prevVisualStyleActive)
 
 void drawGenSearchSettingWindow(Game_context *game)
 {
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    int screenWidth;
+    int screenHeight;
     const char *POPULATION_SIZE_LABEL = "Population size:";
     int *populationSize = malloc(sizeof(int));
     *populationSize = 1000;
@@ -203,7 +203,6 @@ void drawGenSearchSettingWindow(Game_context *game)
     int *maxMoves = malloc(sizeof(int));
     *maxMoves = 3;
     bool isEditingMaxMoves = false;
-    int cursorX = 0;
     while (!WindowShouldClose())
     {
         screenWidth = GetScreenWidth();
@@ -248,13 +247,18 @@ void drawGenSearchSettingWindow(Game_context *game)
         }
         EndDrawing();
     }
+    free(populationSize);
+    free(crossoverRate);
+    free(mutationRate);
+    free(maxGenerations);
+    free(maxMoves);
     CloseWindow();
 }
 
 void drawGameWindow(Game_context *game)
 {
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    int screenWidth;
+    int screenHeight;
     const char *PLAYER_TURN_LABEL = "Your turn";
     const char *PC_TURN_LABEL = "PC turn";
     int cursorX = 0;
@@ -296,8 +300,8 @@ void drawGameWindow(Game_context *game)
 
 void drawFinishWindow(Game_context *game)
 {
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    int screenWidth;
+    int screenHeight;
     const char *PLAYER_WON_LABEL = game->winner == PLAYER ? "You won!" : game->winner == PC ? "PC won!"
                                                                                             : "Draw!";
     const char *TITLE = "Game finished";
@@ -394,8 +398,8 @@ int drawCoinFlip(Game_context *game)
     game->startingPlayer = getStartPlayer(game->startingPlayer);
     game->gameState = game->startingPlayer == 1 ? PLAYER_TURN : PC_TURN;
 
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
+    int screenWidth;
+    int screenHeight;
 
     const int progressBarHeight = 40;
     const int progressMaxValue = 100;

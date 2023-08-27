@@ -93,8 +93,7 @@ int main(int argc, const char **argv)
     if (benchmark)
     {
         printf("Benchmarking...\n");
-        int numGames = 100;
-        bool pcWon = false;
+        int numGames = 1000;
         for (int i = 0; i < numGames; i++)
         {
             double avgGenSearchTime = 0;
@@ -108,7 +107,7 @@ int main(int argc, const char **argv)
                 int pcMove = geneticSearch(game, geneticSearchParameters);
                 benchmark_end();
                 double timeTaken = get_time_taken();
-                printf("Time taken: %fms\n", timeTaken);
+                printf("(%d/%d) - Time taken: %fms\n", i, numGames, timeTaken);
                 avgGenSearchTime += timeTaken;
                 bool isValid = doMove(&game, pcMove, PC);
                 if (!isValid)
@@ -118,7 +117,6 @@ int main(int argc, const char **argv)
                 }
                 if (checkWin(game) != 0)
                 {
-                    pcWon = true;
                     avgGenSearchTime /= turns;
                     break;
                 }
@@ -137,11 +135,11 @@ int main(int argc, const char **argv)
                 }
                 if (checkWin(game) != 0)
                 {
-                    pcWon = false;
                     avgGenSearchTime /= turns;
                     break;
                 }
             }
+            int pcWon = checkWin(game) == COMPUTER;
             char *message = NULL;
             int uuid = rand();
             int threads = 1;

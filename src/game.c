@@ -68,7 +68,7 @@ int getStartPlayer(int startingPlayer)
 {
     if (startingPlayer == 0)
     {
-        return rand() % 2 + 1;
+        return arc4random() % 2 + 1;
     }
     return startingPlayer;
 }
@@ -242,7 +242,7 @@ int getRandomValidMove(Game_context *game)
     // Select a random valid move
     if (validMovesCount > 0)
     {
-        int randomIndex = rand() % validMovesCount;
+        int randomIndex = arc4random() % validMovesCount;
         return validMoves[randomIndex];
     }
 
