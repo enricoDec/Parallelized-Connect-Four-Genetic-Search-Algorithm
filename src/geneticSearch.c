@@ -63,8 +63,8 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
         }
         for (int i = 0; i < populationSize; i++)
         {
-            // freeBoard(&population[i].game);
-            // free(population[i].moves);
+            freeBoard(&population[i].game);
+            free(population[i].moves);
         }
         free(population);
         // Replace the population with the new one
@@ -135,7 +135,7 @@ void reinsertion(Individual *newPopulation, Individual *oldPopulation, Game_cont
     copyBest.fitness = BAD_FITNESS;
     copyBest.game = copyGameContext(&game);
 
-    newPopulation[0] = best;
+    newPopulation[0] = copyBest;
 }
 
 void evaluateFitness(Individual *individual, int maxMoves)
