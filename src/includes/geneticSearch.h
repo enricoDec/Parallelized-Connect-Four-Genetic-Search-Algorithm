@@ -53,17 +53,19 @@ Individual tournamentSelection(Individual *population, int populationSize);
  * @param parent2 The second parent
  * @param game The game context
  * @param crossoverRate The crossover rate
+ * @param maxMoves The maximum number of moves
  * @return The offspring
  */
-Individual crossover(Individual parent1, Individual parent2, Game_context game, double crossoverRate);
+Individual crossover(Individual parent1, Individual parent2, Game_context game, double crossoverRate, int maxMoves);
 
 /**
  * @brief Perform mutation on an individual
  * @param individual The individual
  * @param boardCols The number of columns in the board
  * @param mutationRate The mutation rate
+ * @param maxMoves The maximum number of moves
  */
-void mutate(Individual *individual, int boardCols, double mutationRate);
+void mutate(Individual *individual, int boardCols, double mutationRate, int maxMoves);
 
 /**
  * @brief Reinsert the best individual into the new generation

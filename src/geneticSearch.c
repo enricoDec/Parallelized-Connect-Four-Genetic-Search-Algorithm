@@ -6,6 +6,8 @@
 
 #define BAD_FITNESS INT_MAX
 
+#define NUM_THREADS 4
+
 int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParameters)
 {
     int populationSize = geneticSearchParameters.populationSize;
@@ -13,18 +15,17 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
     double mutationRate = geneticSearchParameters.mutationRate;
     int maxGenerations = geneticSearchParameters.maxGenerations;
     int maxMoves = geneticSearchParameters.maxMoves;
-    int numThreads = 1;
+    omp_set_num_threads(NUM_THREADS);
     // Copy the game context to avoid modifying the original
     game = copyGameContext(&game);
     // Initialize the population
     Individual *population = malloc(populationSize * sizeof(Individual));
-    #pragma omp parallel for num_threads(numThreads)
     for (int i = 0; i < populationSize; i++)
     {
         population[i] = createRandomIndividual(game, maxMoves);
     }
     // Evaluate the fitness of the initial population
-    #pragma omp parallel for num_threads(numThreads)
+    #pragma omp parallel for
     for (int i = 0; i < populationSize; i++)
     {
         evaluateFitness(&population[i], maxMoves);
@@ -35,28 +36,25 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
     {
         // Select parents using tournament selection
         Individual *parents = malloc(populationSize * sizeof(Individual));
-        #pragma omp parallel for num_threads(numThreads)
         for (int i = 0; i < populationSize; i++)
         {
             parents[i] = tournamentSelection(population, populationSize);
         }
         // Perform crossover for each parent to create offspring
         Individual *offspring = malloc(populationSize * sizeof(Individual));
-        #pragma omp parallel for num_threads(numThreads)
         for (int i = 0; i < populationSize; i++)
         {
-            offspring[i] = crossover(parents[i], parents[(i + 1) % populationSize], game, crossoverRate);
+            offspring[i] = crossover(parents[i], parents[(i + 1) % populationSize], game, crossoverRate, maxMoves);
         }
         // Mutate the offspring
-        #pragma omp parallel for num_threads(numThreads)
         for (int i = 0; i < populationSize; i++)
         {
-            mutate(&offspring[i], game.boardCols, mutationRate);
+            mutate(&offspring[i], game.boardCols, mutationRate, maxMoves);
         }
         // Reinsert the best individual from the previous generation
         reinsertion(offspring, population, game, maxMoves);
         // Evaluate the fitness of the offspring
-        #pragma omp parallel for num_threads(numThreads)
+        #pragma omp parallel for
         for (int i = 0; i < populationSize; i++)
         {
             evaluateFitness(&offspring[i], maxMoves);
@@ -91,12 +89,11 @@ Individual tournamentSelection(Individual *population, int populationSize)
     return parent;
 }
 
-Individual crossover(Individual parent1, Individual parent2, Game_context game, double crossoverRate)
+Individual crossover(Individual parent1, Individual parent2, Game_context game, double crossoverRate, int maxMoves)
 {
     Individual offspring;
-    int boardCols = game.boardCols;
-    offspring.moves = malloc(boardCols * sizeof(int));
-    for (int i = 0; i < boardCols; i++)
+    offspring.moves = malloc(maxMoves * sizeof(int)); 
+    for (int i = 0; i < maxMoves; i++)
     {
         if ((double)rand() / RAND_MAX < crossoverRate)
         {
@@ -112,13 +109,13 @@ Individual crossover(Individual parent1, Individual parent2, Game_context game, 
     return offspring;
 }
 
-void mutate(Individual *individual, int boardCols, double mutationRate)
+void mutate(Individual *individual, int boardCols, double mutationRate, int maxMoves)
 {
-    for (int i = 0; i < boardCols; i++)
+    for (int i = 0; i < maxMoves; i++)
     {
         if ((double)rand() / RAND_MAX < mutationRate)
         {
-            individual->moves[i] = rand() % boardCols;
+            individual->moves[i] = arc4random() % boardCols;
         }
     }
 }
@@ -151,8 +148,6 @@ void evaluateFitness(Individual *individual, int maxMoves)
         // If move is invalid or there are no more valid moves, terminate with the worst possible fitness
         if (!isMoveValid || isBoardFull(game))
         {
-            // Use an OpenMP critical section to update fitness
-            #pragma omp critical
             {
                 individual->fitness = BAD_FITNESS;
                 setRemainingMovesToEmpty(individual, i + 1, maxMoves);
@@ -162,7 +157,6 @@ void evaluateFitness(Individual *individual, int maxMoves)
         // If the move results in a win, terminate with the corresponding fitness (moves to win)
         if (result == PC)
         {
-            #pragma omp critical
             {
                 individual->fitness = movesToWin;
                 setRemainingMovesToEmpty(individual, i + 1, maxMoves);
@@ -180,7 +174,6 @@ void evaluateFitness(Individual *individual, int maxMoves)
         movesToWin++;
     }
     // If all moves are exhausted, terminate with the worst possible fitness
-    #pragma omp critical
     {
         individual->fitness = BAD_FITNESS;
     }

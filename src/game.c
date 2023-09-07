@@ -8,14 +8,16 @@ Game_context initGame(int boardRows, int boardCols, StartingPlayer startingPlaye
     game.gameWindow = WELCOME;
     game.boardRows = boardRows;
     game.boardCols = boardCols;
+    game.board = NULL;
+    game.startingPlayer = startingPlayer;
+    game.gameState = PRE_GAME;
+    game.winner = EMPTY;
+    
     game.board = (BoardState **)malloc(game.boardRows * sizeof(BoardState *));
     for (int i = 0; i < game.boardRows; i++)
     {
         game.board[i] = (BoardState *)malloc(game.boardCols * sizeof(BoardState));
     }
-    game.startingPlayer = startingPlayer;
-    game.gameState = PRE_GAME;
-    game.winner = EMPTY;
     return game;
 }
 

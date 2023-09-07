@@ -15,8 +15,8 @@ static const char *const usages[] = {
 
 int main(int argc, const char **argv)
 {
-    int rows = 7;
-    int cols = 6;
+    int rows = 20;
+    int cols = 20;
     int populationSize = 1000;
     double crossoverRate = 0.8;
     double mutationRate = 0.01;
@@ -142,7 +142,7 @@ int main(int argc, const char **argv)
             int pcWon = checkWin(game) == COMPUTER;
             char *message = NULL;
             int uuid = rand();
-            int threads = 1;
+            int threads = 4;
             asprintf(&message, "%d,%d,%d,%d,%d,%f,%f,%d,%d,%f,%d",
                      uuid,
                      threads,
@@ -156,8 +156,6 @@ int main(int argc, const char **argv)
                      avgGenSearchTime,
                      pcWon);
             benchmark_printCol(message);
-            freeBoard(&game);
-            free(message);
         }
     }
     else

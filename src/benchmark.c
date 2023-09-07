@@ -28,10 +28,19 @@ void benchmark_printCol(char *message)
 {
     FILE *fp;
     fp = fopen("benchmark.csv", "a");
+    if (fp == NULL)
+    {
+        perror("Error opening file");
+        return;
+    }
     if (ftell(fp) == 0)
     {
-        fprintf(fp, "UUID,threads,Rows,Columns,Population size,crossover rate,mutation rate,max number of generations,max number of moves (genes),average search time, PC Won\n");
+        fprintf(fp, "UUID,threads,Rows,Columns,Population size,crossover rate,mutation rate,max number of generations,max number of moves (genes),average search time (turn), PC Won\n");
     }
-    fprintf(fp, "%s\n", message);
+    if (message != NULL)
+    {
+        fprintf(fp, "%s\n", message);
+    }
     fclose(fp);
+    free(message);
 }
