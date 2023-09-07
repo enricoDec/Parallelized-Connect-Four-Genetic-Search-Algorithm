@@ -103,7 +103,7 @@ MU_TEST(test_mutate)
     double mutationRate = 0.1;
     Game_context game = initGame(6, 6, 1);
     Individual individual = createRandomIndividual(game, maxMoves);
-    mutate(&individual, game.boardCols, mutationRate);
+    mutate(&individual, game.boardCols, mutationRate, maxMoves);
 }
 
 MU_TEST(test_crossover)
@@ -113,7 +113,7 @@ MU_TEST(test_crossover)
     Game_context game = initGame(6, 6, 1);
     Individual parent1 = createRandomIndividual(game, maxMoves);
     Individual parent2 = createRandomIndividual(game, maxMoves);
-    Individual offspring = crossover(parent1, parent2, game, crossoverRate);
+    Individual offspring = crossover(parent1, parent2, game, crossoverRate, maxMoves);
     for (int i = 0; i < game.boardCols; i++)
     {
         mu_assert(offspring.moves[i] == parent1.moves[i] || offspring.moves[i] == parent2.moves[i],
