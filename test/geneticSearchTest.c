@@ -114,7 +114,7 @@ MU_TEST(test_crossover)
     Individual parent1 = createRandomIndividual(game, maxMoves);
     Individual parent2 = createRandomIndividual(game, maxMoves);
     Individual offspring = crossover(parent1, parent2, game, crossoverRate, maxMoves);
-    for (int i = 0; i < game.boardCols; i++)
+    for (int i = 0; i < maxMoves; i++)
     {
         mu_assert(offspring.moves[i] == parent1.moves[i] || offspring.moves[i] == parent2.moves[i],
                   "offspring.moves[i] should be equal to parent1.moves[i] or parent2.moves[i]");

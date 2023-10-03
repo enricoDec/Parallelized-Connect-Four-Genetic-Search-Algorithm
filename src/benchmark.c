@@ -35,7 +35,7 @@ void benchmark_printCol(char *message)
     }
     if (ftell(fp) == 0)
     {
-        fprintf(fp, "UUID,threads,Rows,Columns,Population size,crossover rate,mutation rate,max number of generations,max number of moves (genes),average search time (turn), PC Won\n");
+        fprintf(fp, "UUID,threads,Rows,Columns,Population size,crossover rate,mutation rate,max number of generations,max number of moves (genes),average search time (turn), game status\n");
     }
     if (message != NULL)
     {

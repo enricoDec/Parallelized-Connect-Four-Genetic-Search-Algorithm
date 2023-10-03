@@ -6,6 +6,9 @@
 #include "includes/gameUI.h"
 #include "includes/geneticSearch.h"
 #include "includes/benchmark.h"
+#include <omp.h>
+
+int checkArgs(int version, int rows, int cols, int maxMoves, int populationSize, double crossoverRate, double mutationRate, int maxGenerations);
 
 static const char *const usages[] = {
     "connect4 [options] [[--] args]",
@@ -13,10 +16,12 @@ static const char *const usages[] = {
     NULL,
 };
 
+const int NUM_THREADS = 2;
+
 int main(int argc, const char **argv)
 {
-    int rows = 20;
-    int cols = 20;
+    int rows = 6;
+    int cols = 7;
     int populationSize = 1000;
     double crossoverRate = 0.8;
     double mutationRate = 0.01;
@@ -43,6 +48,103 @@ int main(int argc, const char **argv)
     argparse_init(&argparse, options, usages, 0);
     argparse_describe(&argparse, "\n Connect 4", "\n Connect 4");
     argparse_parse(&argparse, argc, argv);
+    int result = checkArgs(version, rows, cols, maxMoves, populationSize, crossoverRate, mutationRate, maxGenerations);
+    if (result != 0)
+    {
+        return result;
+    }
+    StartingPlayer startingPlayer = RANDOM;
+    GeneticSearchParameters geneticSearchParameters =
+        {populationSize,
+         crossoverRate,
+         mutationRate,
+         maxGenerations,
+         maxMoves};
+    if (benchmark)
+    {
+        omp_set_num_threads(NUM_THREADS);
+        printf("Benchmarking with %d threads\n", NUM_THREADS);
+        int numGames = 500;
+        for (int i = 0; i < numGames; i++)
+        {
+            int uuid = rand();
+            double genSearchTime = 0;
+            int threads = NUM_THREADS;
+            Game_context game = initGame(rows, cols, COMPUTER);
+            while (checkWin(game) == 0)
+            {
+                // do pc move
+                benchmark_start();
+                int pcMove = geneticSearch(game, geneticSearchParameters);
+                benchmark_end();
+                genSearchTime = get_time_taken();
+                printf("(%d/%d) - Time taken: %fms\n", i, numGames, genSearchTime);
+                bool isValid = doMove(&game, pcMove, PC);
+                if (!isValid)
+                {
+                    printf("PC took invalid move (%d)!!!!\n", pcMove);
+                    break;
+                }
+                int gameState = checkWin(game);
+                if (gameState != 0)
+                {
+                    char *message = NULL;
+                    asprintf(&message, "%d,%d,%d,%d,%d,%f,%f,%d,%d,%f,%d",
+                             uuid,
+                             threads,
+                             rows,
+                             cols,
+                             populationSize,
+                             crossoverRate,
+                             mutationRate,
+                             maxGenerations,
+                             maxMoves,
+                             genSearchTime,
+                             gameState);
+                    benchmark_printCol(message);
+                    break;
+                }
+                // printf("Board after PC move:\n");
+                // printBoard(game);
+                // do user move (random)
+                int playerMove = getRandomValidMove(&game);
+                isValid = doMove(&game, playerMove, PLAYER);
+                if (!isValid)
+                {
+                    printf("User took invalid move!!!!\n");
+                    break;
+                }
+                char *message = NULL;
+                asprintf(&message, "%d,%d,%d,%d,%d,%f,%f,%d,%d,%f,%d",
+                         uuid,
+                         threads,
+                         rows,
+                         cols,
+                         populationSize,
+                         crossoverRate,
+                         mutationRate,
+                         maxGenerations,
+                         maxMoves,
+                         genSearchTime,
+                         checkWin(game));
+                benchmark_printCol(message);
+                //printf("Board after User move:\n");
+                //printBoard(game);
+            }
+        }
+    }
+    else
+    {
+        initUI(800, 450);
+        Game_context game = initGame(rows, cols, startingPlayer);
+        loop(&game);
+        freeBoard(&game);
+    }
+    return 0;
+}
+
+int checkArgs(int version, int rows, int cols, int maxMoves, int populationSize, double crossoverRate, double mutationRate, int maxGenerations)
+{
     if (version)
     {
         printf("Connect 4 version 1.0.0\n");
@@ -83,87 +185,4 @@ int main(int argc, const char **argv)
         printf("Max generations must be higher then 0!\n");
         return 1;
     }
-    StartingPlayer startingPlayer = RANDOM;
-    GeneticSearchParameters geneticSearchParameters =
-        {populationSize,
-         crossoverRate,
-         mutationRate,
-         maxGenerations,
-         maxMoves};
-    if (benchmark)
-    {
-        printf("Benchmarking...\n");
-        int numGames = 1000;
-        for (int i = 0; i < numGames; i++)
-        {
-            double avgGenSearchTime = 0;
-            int turns = 0;
-            Game_context game = initGame(rows, cols, COMPUTER);
-            while (checkWin(game) == 0)
-            {
-                turns++;
-                // do pc move
-                benchmark_start();
-                int pcMove = geneticSearch(game, geneticSearchParameters);
-                benchmark_end();
-                double timeTaken = get_time_taken();
-                printf("(%d/%d) - Time taken: %fms\n", i, numGames, timeTaken);
-                avgGenSearchTime += timeTaken;
-                bool isValid = doMove(&game, pcMove, PC);
-                if (!isValid)
-                {
-                    printf("PC took invalid move!\n");
-                    break;
-                }
-                if (checkWin(game) != 0)
-                {
-                    avgGenSearchTime /= turns;
-                    break;
-                }
-                // do user move (random)
-                int playerMove = getRandomValidMove(&game);
-                if (playerMove == -1)
-                {
-                    printf("No valid moves available!\n");
-                    break;
-                }
-                isValid = doMove(&game, pcMove, PLAYER);
-                if (!isValid)
-                {
-                    printf("User took invalid move!\n");
-                    break;
-                }
-                if (checkWin(game) != 0)
-                {
-                    avgGenSearchTime /= turns;
-                    break;
-                }
-            }
-            int pcWon = checkWin(game) == COMPUTER;
-            char *message = NULL;
-            int uuid = rand();
-            int threads = 4;
-            asprintf(&message, "%d,%d,%d,%d,%d,%f,%f,%d,%d,%f,%d",
-                     uuid,
-                     threads,
-                     rows,
-                     cols,
-                     populationSize,
-                     crossoverRate,
-                     mutationRate,
-                     maxGenerations,
-                     maxMoves,
-                     avgGenSearchTime,
-                     pcWon);
-            benchmark_printCol(message);
-        }
-    }
-    else
-    {
-        initUI(800, 450);
-        Game_context game = initGame(rows, cols, startingPlayer);
-        loop(&game);
-        freeBoard(&game);
-    }
-    return 0;
 }

@@ -150,7 +150,7 @@ void printBoard(Game_context game);
 /**
  * @brief Get a random valid move
  * @param game The game context
- * @return The column of the random valid move
+ * @return The column of the random valid move or -1 if there is no valid move
  */
 int getRandomValidMove(Game_context *game);
 

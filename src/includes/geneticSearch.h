@@ -48,7 +48,7 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
 Individual tournamentSelection(Individual *population, int populationSize);
 
 /**
- * @brief Perform crossover between two parents to create offspring
+ * @brief Perform crossover between two parents to create an offspring
  * @param parent1 The first parent
  * @param parent2 The second parent
  * @param game The game context
@@ -77,11 +77,29 @@ void mutate(Individual *individual, int boardCols, double mutationRate, int maxM
 void reinsertion(Individual *newPopulation, Individual *oldPopulation, Game_context game, int maxMoves);
 
 /**
+ * Evaluate the fitness of the population in parallel
+ * @param population The population to evaluate
+ * @param populationSize The size of the population
+ * @param maxMoves The maximum number of moves to evaluate
+ */
+void multithreadedEvaluateFitness(Individual *population, int populationSize, int maxMoves);
+
+/**
+ * Evaluate the fitness of a subset of the population in parallel
+ * @param population The population to evaluate
+ * @param startIdx The index of the first individual to evaluate
+ * @param endIdx The index of the last individual to evaluate
+ * @param maxMoves The maximum number of moves to evaluate
+ */
+void evaluateFitnessSubset(Individual *population, int startIdx, int endIdx, int maxMoves);
+
+/**
  * @brief Evaluate the fitness of an individual
  * @param individual The individual
  * @param maxMoves The maximum number of moves
+ * @return The fitness of the individual
  */
-void evaluateFitness(Individual *individual, int maxMoves);
+int evaluateFitness(Individual *individual, int maxMoves);
 
 /**
  * @brief Find the best individual in the population
@@ -122,5 +140,13 @@ int bestFitness(int fitnessA, int fitnessB);
  * @return The worst fitness value
  */
 int worstFitness(int fitnessA, int fitnessB);
+
+/**
+ * @brief Print the population
+ * @param population The population
+ * @param populationSize The population size
+ * @param maxMoves The maximum number of moves
+ */
+void printPopulation(Individual *population, int populationSize, int maxMoves);
 
 #endif // GENETIC_SEARCH_H
