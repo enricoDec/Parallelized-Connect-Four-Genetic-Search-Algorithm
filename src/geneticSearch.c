@@ -20,14 +20,6 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
         population[i] = createRandomIndividual(game, maxMoves);
     }
     multithreadedEvaluateFitness(population, populationSize, maxMoves);
-    // for (int i = 0; i < populationSize; i++)
-    // {
-    //     int fitness = evaluateFitness(&population[i], maxMoves);
-    //     #pragma omp critical
-    //     {
-    //         population[i].fitness = fitness;
-    //     }
-    // }
     int generation = 0;
     while (generation < maxGenerations)
     {
@@ -47,15 +39,6 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
         }
         reinsertion(offspring, population, game, maxMoves);
         multithreadedEvaluateFitness(offspring, populationSize, maxMoves);
-        // #pragma omp parallel for num_threads(4)
-        // for (int i = 0; i < populationSize; i++)
-        // {
-        //     int fitness = evaluateFitness(&offspring[i], maxMoves);
-        //     #pragma omp critical
-        //     {
-        //         offspring[i].fitness = fitness;
-        //     }
-        // }
         for (int i = 0; i < populationSize; i++)
         {
             freeBoard(&population[i].game);

@@ -36,6 +36,7 @@ typedef struct geneticSearchParameters
  * @param game The game context
  * @param geneticSearchParameters The genetic search parameters
  * @return The best next move
+ * @note This function is thread safe
  */
 int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParameters);
 

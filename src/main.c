@@ -8,6 +8,8 @@
 #include "includes/benchmark.h"
 #include <omp.h>
 
+const int NUM_THREADS = 2;
+
 int checkArgs(int version, int rows, int cols, int maxMoves, int populationSize, double crossoverRate, double mutationRate, int maxGenerations);
 
 static const char *const usages[] = {
@@ -15,8 +17,6 @@ static const char *const usages[] = {
     "connect4 [options]",
     NULL,
 };
-
-const int NUM_THREADS = 2;
 
 int main(int argc, const char **argv)
 {
@@ -63,13 +63,12 @@ int main(int argc, const char **argv)
     if (benchmark)
     {
         omp_set_num_threads(NUM_THREADS);
-        printf("Benchmarking with %d threads\n", NUM_THREADS);
+        printf("Benchmarking with %d threads\n", omp_get_max_threads());
         int numGames = 500;
         for (int i = 0; i < numGames; i++)
         {
             int uuid = rand();
             double genSearchTime = 0;
-            int threads = NUM_THREADS;
             Game_context game = initGame(rows, cols, COMPUTER);
             while (checkWin(game) == 0)
             {
@@ -91,7 +90,7 @@ int main(int argc, const char **argv)
                     char *message = NULL;
                     asprintf(&message, "%d,%d,%d,%d,%d,%f,%f,%d,%d,%f,%d",
                              uuid,
-                             threads,
+                             NUM_THREADS,
                              rows,
                              cols,
                              populationSize,
@@ -117,7 +116,7 @@ int main(int argc, const char **argv)
                 char *message = NULL;
                 asprintf(&message, "%d,%d,%d,%d,%d,%f,%f,%d,%d,%f,%d",
                          uuid,
-                         threads,
+                         NUM_THREADS,
                          rows,
                          cols,
                          populationSize,
