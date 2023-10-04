@@ -1,6 +1,6 @@
-CC := gcc-13
-CFLAGS := $(shell pkg-config --cflags raylib) -O3 -Xpreprocessor -fopenmp -ftree-parallelize-loops=1 #-Wall -Wextra -Wpedantic -std=c99 -O3
-LDFLAGS := $(shell pkg-config --libs raylib) -lm -fopenmp
+CC := gcc
+CFLAGS := $(shell pkg-config --cflags raylib) -O3 #-Xpreprocessor -fopenacc # -fopt-info-optimized -fopt-info-missed=missed.log # -fopenmp -ftree-parallelize-loops=1 #-Wall -Wextra -Wpedantic -std=c99 -O3
+LDFLAGS := $(shell pkg-config --libs raylib) -lm #-fopenacc 
 
 SRCDIR := src
 TESTDIR := test
