@@ -38,16 +38,18 @@ def compiler_comparison(csv):
     grouped.plot(kind='bar', color=['orange', 'grey'], alpha=0.7)
     plt.title('Average Search Time (Turn)')
     plt.xlabel('Compiler Optimization')
-    plt.ylabel('Average Search Time (Turn)')
+    plt.ylabel('Average Search Time (Turn) in ms')
     plt.xticks(range(len(custom_labels)), custom_labels, rotation=0)
     plt.legend(['No optimization', '- O3'])
+    for i, value1 in zip(range(len(grouped)), grouped):
+        plt.text(i, value1 + 0.4, str(round(value1, 2)) + "ms", ha='center')
     plt.show()
     df_filtered = df[df['threads'].isin([1, 2])]
     plt.figure(figsize=(8, 6))
     sns.boxplot(x='threads', y='average search time (turn)', data=df_filtered)
     plt.title('Box Plot of Average Search Time (Turn)')
     plt.xlabel('Compiler Optimization')
-    plt.ylabel('Average Search Time (Turn)')
+    plt.ylabel('Average Search Time (Turn) in ms')
     plt.xticks(range(len(custom_labels)), custom_labels, rotation=0)
     plt.legend(['No optimization', '- O3'])
     plt.show()
@@ -71,4 +73,4 @@ def bar_plot_log(csv):
         plt.text(index, value + 0.4, str(round(value, 2)) + "ms", ha='center')
     plt.show()
 
-bar_plot_log('../benchmark.csv')
+compiler_comparison('03vsNo.csv')

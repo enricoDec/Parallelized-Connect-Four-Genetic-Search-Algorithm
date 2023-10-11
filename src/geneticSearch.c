@@ -110,14 +110,18 @@ void reinsertion(Individual *newPopulation, Individual *oldPopulation, Game_cont
     newPopulation[0] = copyBest;
 }
 
-void evaluateFitnessSubset(Individual *population, int startIdx, int endIdx, int maxMoves) {
-    for (int i = startIdx; i < endIdx; i++) {
+void evaluateFitnessSubset(Individual *population, int startIdx, int endIdx, int maxMoves)
+{
+    for (int i = startIdx; i < endIdx; i++)
+    {
         population[i].fitness = evaluateFitness(&population[i], maxMoves);
     }
 }
 
-void multithreadedEvaluateFitness(Individual *population, int populationSize, int maxMoves) {
+void multithreadedEvaluateFitness(Individual *population, int populationSize, int maxMoves) 
+{
     #pragma omp parallel
+    #pragma acc parallel
     {
         int numThreads = omp_get_num_threads();
         int chunkSize = populationSize / numThreads;
@@ -158,7 +162,7 @@ int evaluateFitness(Individual *individual, int maxMoves)
         result = checkWin(game);
         if (result == PLAYER)
         {
-            playerWin = true; // Player won
+            playerWin = true;     // Player won
             fitness = movesToWin; // Update fitness
         }
         else if (result == PC)
