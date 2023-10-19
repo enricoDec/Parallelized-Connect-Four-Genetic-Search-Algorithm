@@ -148,51 +148,55 @@ bool undoMove(Game_context *game, int col, BoardState player)
 
 int checkWin(const Game_context game)
 {
-    const int numRows = game.boardRows;
-    const int numCols = game.boardCols;
-    for (int i = 0; i < numRows; i++) {
-        for (int j = 0; j < numCols; j++) {
-            int cell = game.board[i][j];
-            if (cell != EMPTY) {
-                // Check horizontal win
-                if (j + 3 < numCols &&
-                    game.board[i][j + 1] == cell &&
-                    game.board[i][j + 2] == cell &&
-                    game.board[i][j + 3] == cell) {
-                    return (cell == PLAYER) ? 1 : 2; // Player or PC wins
-                }
-                // Check vertical win
-                if (i + 3 < numRows &&
-                    game.board[i + 1][j] == cell &&
-                    game.board[i + 2][j] == cell &&
-                    game.board[i + 3][j] == cell) {
-                    return (cell == PLAYER) ? 1 : 2; // Player or PC wins
-                }
-                // Check diagonal wins
-                if (j + 3 < numCols) {
-                    // Check up-right diagonal
-                    if (i + 3 < numRows &&
-                        game.board[i + 1][j + 1] == cell &&
-                        game.board[i + 2][j + 2] == cell &&
-                        game.board[i + 3][j + 3] == cell) {
-                        return (cell == PLAYER) ? 1 : 2; // Player or PC wins
-                    }
-                    // Check up-left diagonal
-                    if (i + 3 < numRows &&
-                        j >= 3 &&
-                        game.board[i + 1][j - 1] == cell &&
-                        game.board[i + 2][j - 2] == cell &&
-                        game.board[i + 3][j - 3] == cell) {
-                        return (cell == PLAYER) ? 1 : 2; // Player or PC wins
-                    }
-                }
+    // Check rows
+    for (int i = 0; i < game.boardRows; i++)
+    {
+        for (int j = 0; j < game.boardCols - 3; j++)
+        {
+            if (game.board[i][j] != EMPTY && game.board[i][j] == game.board[i][j + 1] && game.board[i][j] == game.board[i][j + 2] && game.board[i][j] == game.board[i][j + 3])
+            {
+                return game.board[i][j];
             }
         }
     }
-    if (isBoardFull(game)) {
-        return 3; // Draw
+    // Check columns
+    for (int i = 0; i < game.boardRows - 3; i++)
+    {
+        for (int j = 0; j < game.boardCols; j++)
+        {
+            if (game.board[i][j] != EMPTY && game.board[i][j] == game.board[i + 1][j] && game.board[i][j] == game.board[i + 2][j] && game.board[i][j] == game.board[i + 3][j])
+            {
+                return game.board[i][j];
+            }
+        }
     }
-    return 0; // No winner yet
+    // Check diagonals
+    for (int i = 0; i < game.boardRows - 3; i++)
+    {
+        for (int j = 0; j < game.boardCols - 3; j++)
+        {
+            if (game.board[i][j] != EMPTY && game.board[i][j] == game.board[i + 1][j + 1] && game.board[i][j] == game.board[i + 2][j + 2] && game.board[i][j] == game.board[i + 3][j + 3])
+            {
+                return game.board[i][j];
+            }
+        }
+    }
+    for (int i = 0; i < game.boardRows - 3; i++)
+    {
+        for (int j = 3; j < game.boardCols; j++)
+        {
+            if (game.board[i][j] != EMPTY && game.board[i][j] == game.board[i + 1][j - 1] && game.board[i][j] == game.board[i + 2][j - 2] && game.board[i][j] == game.board[i + 3][j - 3])
+            {
+                return game.board[i][j];
+            }
+        }
+    }
+    // Check draw (board is full)
+    if (isBoardFull(game))
+    {
+        return 3;
+    }
+    return 0;
 }
 
 void printBoard(Game_context game)
