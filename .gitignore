@@ -59,4 +59,3 @@ dkms.conf
 doc/*
 /src/.idea/*
 /src/cmake-build-debug/*
-*.csv
