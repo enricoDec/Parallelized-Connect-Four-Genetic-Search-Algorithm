@@ -73,4 +73,22 @@ def bar_plot_log(csv):
         plt.text(index, value + 0.4, str(round(value, 2)) + "ms", ha='center')
     plt.show()
 
-compiler_comparison('03vsNo.csv')
+def bar_plot_openacc_log(csv):
+    df = pd.read_csv(csv)
+    grouped = df.groupby('threads')['average search time (turn)'].mean()
+    custom_labels = ['No OpenACC', 'With OpenACC']
+
+    plt.figure(figsize=(8, 6))
+    ax = sns.barplot(x=grouped.index, y=grouped.values, alpha=0.7)
+
+    plt.yscale('log')  # Set the y-axis to logarithmic scale
+
+    plt.title('Average Search Time (per turn)')
+    plt.ylabel('Average Search Time (Turn) in ms (Log Scale)')
+    plt.xticks(range(len(custom_labels)), custom_labels, rotation=0)
+
+    for index, value in enumerate(grouped):
+        plt.text(index, value + 0.08, str(round(value, 2)) + "ms", ha='center')
+    plt.show()
+
+bar_plot_openacc_log('../benchmark.csv')
