@@ -8,7 +8,7 @@
 #include "includes/benchmark.h"
 #include <omp.h>
 
-const int NUM_THREADS = 2;
+const int NUM_THREADS = 1;
 
 int checkArgs(int version, int rows, int cols, int maxMoves, int populationSize, double crossoverRate, double mutationRate, int maxGenerations);
 

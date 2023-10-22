@@ -19,7 +19,11 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
     {
         population[i] = createRandomIndividual(game, maxMoves);
     }
-    multithreadedEvaluateFitness(population, populationSize, maxMoves);
+    #pragma acc parallel loop present(population) num_gangs(1) vector_length(1)
+    for (int i = 0; i < populationSize; i++)
+    {
+        population[i].fitness = evaluateFitness(&population[i], maxMoves);
+    }
     int generation = 0;
     while (generation < maxGenerations)
     {
@@ -38,7 +42,11 @@ int geneticSearch(Game_context game, GeneticSearchParameters geneticSearchParame
             mutate(&offspring[i], game.boardCols, mutationRate, maxMoves);
         }
         reinsertion(offspring, population, game, maxMoves);
-        multithreadedEvaluateFitness(offspring, populationSize, maxMoves);
+        #pragma acc parallel loop present(population)
+        for (int i = 0; i < populationSize; i++)
+        {
+            offspring[i].fitness = evaluateFitness(&offspring[i], maxMoves);
+        }
         for (int i = 0; i < populationSize; i++)
         {
             freeBoard(&population[i].game);
@@ -114,14 +122,16 @@ void evaluateFitnessSubset(Individual *population, int startIdx, int endIdx, int
 {
     for (int i = startIdx; i < endIdx; i++)
     {
-        population[i].fitness = evaluateFitness(&population[i], maxMoves);
+        #pragma omp critical 
+        {
+            population[i].fitness = evaluateFitness(&population[i], maxMoves);
+        }
     }
 }
 
 void multithreadedEvaluateFitness(Individual *population, int populationSize, int maxMoves) 
 {
     #pragma omp parallel
-    #pragma acc parallel
     {
         int numThreads = omp_get_num_threads();
         int chunkSize = populationSize / numThreads;

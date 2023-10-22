@@ -78,7 +78,7 @@ void mutate(Individual *individual, int boardCols, double mutationRate, int maxM
 void reinsertion(Individual *newPopulation, Individual *oldPopulation, Game_context game, int maxMoves);
 
 /**
- * Evaluate the fitness of the population in parallel
+ * Evaluate the fitness of the population in parallel using OpenMP
  * @param population The population to evaluate
  * @param populationSize The size of the population
  * @param maxMoves The maximum number of moves to evaluate
