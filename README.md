@@ -72,3 +72,6 @@ To get started with this project, follow these steps:
 2. Install the required dependencies (raylib and raylib-gui).
 3. Build the project using: `make build`.
 4. Run the program with the desired configuration.
+
+## Results
+![Benchmark result with OpenMP parallel](res/OpenMPv2Benchmark.png)
